@@ -1,0 +1,9 @@
+# Folders
+.vscode
+/infra/arangodb
+
+# Files
+*.DS_Store
+/conf.d/env.yaml
+env.yaml
+main
