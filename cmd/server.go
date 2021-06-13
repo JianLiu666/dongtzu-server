@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"dongtzu/pkg/repository/arangodb"
+	"dongtzu/pkg/service/linebot"
 	"dongtzu/pkg/service/scheduler"
 	"os"
 	"os/signal"
@@ -26,6 +27,9 @@ func RunServerCmd(cmd *cobra.Command, args []string) error {
 
 	scheduler.Init()
 	scheduler.Start()
+
+	linebot.Init()
+	linebot.Start()
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
