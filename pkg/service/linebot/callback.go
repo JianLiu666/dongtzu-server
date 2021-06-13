@@ -17,15 +17,15 @@ func lineBotCallbacks(w http.ResponseWriter, r *http.Request) {
 		logger.Debugf("[LineBot] event payload: %v", event)
 		switch event.Type {
 		case linebot.EventTypeFollow:
-			logger.Debugf("[LineBot] Follower: %v\n", event.Source.UserID)
+			logger.Debugf("[LineBot] Follower: %v", event.Source.UserID)
 
 		case linebot.EventTypeUnfollow:
-			logger.Debugf("[LineBot] Unfollower: %v\n", event.Source.UserID)
+			logger.Debugf("[LineBot] Unfollower: %v", event.Source.UserID)
 
 		case linebot.EventTypeMessage:
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
-				logger.Debugf("[LineBot] Receive message from %v, content is %v\n", event.Source.UserID, message.Text)
+				logger.Debugf("[LineBot] Receive message from %v, content is %v", event.Source.UserID, message.Text)
 			}
 
 		default:
