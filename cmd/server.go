@@ -1,6 +1,11 @@
 package cmd
 
 import (
+	"dongtzu/pkg/service/scheduler"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/spf13/cobra"
 )
 
@@ -16,6 +21,12 @@ func init() {
 }
 
 func RunServerCmd(cmd *cobra.Command, args []string) error {
+	scheduler.Init()
+	scheduler.Start()
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+	<-c
 
 	return nil
 }
