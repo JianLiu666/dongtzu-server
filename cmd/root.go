@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"dongtzu/config"
-	"fmt"
 	"runtime"
 	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gitlab.geax.io/demeter/gologger/logger"
 )
 
 var cfgFile string
@@ -28,6 +28,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "f", "./conf.d/env.yaml", "config file")
 	rootCmd.PersistentFlags().StringVarP(&gitCommitNum, "version", "v", "unknown", "git commit hash")
 	rootCmd.PersistentFlags().StringVarP(&buildTime, "buildTime", "b", time.Now().String(), "binary build time")
+
+	logger.Init("debug")
 }
 
 func initConfig() {
@@ -41,9 +43,9 @@ func initConfig() {
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Printf("ReadInConfig file failed: %v\n", err)
+		logger.Errorf("ReadInConfig file failed: %v", err)
 	} else {
-		fmt.Printf("Using config file: %v\n", viper.ConfigFileUsed())
+		logger.Debugf("Using config file: %v", viper.ConfigFileUsed())
 	}
 }
 
@@ -55,17 +57,17 @@ func PersistentPreRunBeforeCommandStartUp(cmd *cobra.Command, args []string) err
 	goVersion := runtime.Version()
 	osName := runtime.GOOS
 	architecture := runtime.GOARCH
-	fmt.Println("======")
-	fmt.Printf("Build on %s\n", buildTime)
-	fmt.Printf("GoVersion: %s\n", goVersion)
-	fmt.Printf("GitCommitNum: %s\n", gitCommitNum)
-	fmt.Printf("OS: %s\n", osName)
-	fmt.Printf("Architecture: %s\n", architecture)
-	fmt.Println("======")
+	logger.Debugf("============================================================")
+	logger.Debugf("Build on %s", buildTime)
+	logger.Debugf("GoVersion: %s", goVersion)
+	logger.Debugf("GitCommitNum: %s", gitCommitNum)
+	logger.Debugf("OS: %s", osName)
+	logger.Debugf("Architecture: %s", architecture)
+	logger.Debugf("============================================================")
 
 	c, err := config.NewFromViper()
 	if err != nil {
-		fmt.Printf("Init config failed: %v\n", err)
+		logger.Errorf("Init config failed: %v", err)
 	} else {
 		config.SetConfig(c)
 	}

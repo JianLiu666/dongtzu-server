@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"dongtzu/pkg/repository/arangodb"
 	"dongtzu/pkg/service/scheduler"
 	"os"
 	"os/signal"
@@ -21,6 +22,8 @@ func init() {
 }
 
 func RunServerCmd(cmd *cobra.Command, args []string) error {
+	arangodb.Init()
+
 	scheduler.Init()
 	scheduler.Start()
 

@@ -1,15 +1,16 @@
 package scheduler
 
 import (
-	"fmt"
 	"time"
+
+	"gitlab.geax.io/demeter/gologger/logger"
 )
 
 func addExample() {
 	_, err := manager.AddFunc("@every 1s", func() {
-		fmt.Println(time.Now().Clock())
+		logger.Debugf("[Scheduler] %v", time.Now())
 	})
 	if err != nil {
-		fmt.Printf("add cronjob failed: %v\n", err)
+		logger.Errorf("[Scheduler] add cronjob failed: %v\n", err)
 	}
 }

@@ -1,15 +1,14 @@
 package scheduler
 
 import (
-	"fmt"
-
 	"github.com/robfig/cron/v3"
+	"gitlab.geax.io/demeter/gologger/logger"
 )
 
 var manager *cron.Cron
 
 func Init() {
-	defer fmt.Println("Scheduler Initialized.")
+	defer logger.Debugf("[Scheduler] Initialized.")
 
 	manager = cron.New()
 	addExample()
