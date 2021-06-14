@@ -20,13 +20,25 @@ type GetProviderInfoRes struct {
 	Data       *model.Provider `json:"data"`
 }
 
+type RegisterProviderReq struct {
+}
+
+type RegisterProviderRes struct {
+}
+
+type UpdateProviderInfoReq struct {
+}
+
+type UpdateProviderInfoRes struct {
+}
+
 func GetProviderInfo() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		lineUserID := c.Params("lineUserId")
 		if lineUserID == "" {
 			return c.Status(fasthttp.StatusNotFound).JSON(ErrRes{
 				Code:       "404001",
-				StatusCode: "404",
+				StatusCode: "404001",
 				Message:    "No given Line user ID",
 			})
 		}
@@ -36,7 +48,7 @@ func GetProviderInfo() fiber.Handler {
 		if err != nil {
 			return c.Status(fasthttp.StatusInternalServerError).JSON(ErrRes{
 				Code:       "500001",
-				StatusCode: "500",
+				StatusCode: "500001",
 				Message:    "SERVER_ERROR",
 			})
 		}

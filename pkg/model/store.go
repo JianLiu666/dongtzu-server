@@ -1,8 +1,15 @@
 package model
 
 type Provider struct {
-	ID         string `json:"_key,omitempty"` // increment unique key
-	LineUserID string `json:"lineUserId"`     // line user id (e.g. U1234567890abcdef1234567890abcdef)
+	ID          string `json:"_key,omitempty"` // increment unique key
+	LineUserID  string `json:"lineUserId"`     // unique line user id (e.g. U1234567890abcdef1234567890abcdef)
+	RealName    string `json:"realName"`       // 中文姓名(真實)
+	LineAtName  string `json:"lineAtName"`     // 申請Line官方帳號名稱
+	LineAtID    string `json:"LineAtID"`       // 申請Line官方帳號ID
+	CountryCode string `json:"countryCode"`    // 手機國碼(暫不實作)
+	PhoneNum    string `json:"phoneNum"`       // 手機號碼
+	GmailAddr   string `json:"gamilAddr"`      // Gamil
+	InviteCode  string `json:"inviteCode"`     // 企業用戶，業務推廣碼
 }
 
 type Consumer struct {
