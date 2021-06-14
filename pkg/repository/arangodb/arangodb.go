@@ -40,3 +40,9 @@ func Init() {
 		logger.Debugf("[ArangoDB] Initialized.")
 	})
 }
+
+func closeCursor(cursor driver.Cursor) {
+	if err := cursor.Close(); err != nil {
+		logger.Errorf("[ArangoDB] close cursor failed: %v", err)
+	}
+}

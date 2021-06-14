@@ -21,7 +21,7 @@ func GetAndConfirmApptsByStartTimestamp(ctx context.Context, startTimestamp, end
 	bindVars := map[string]interface{}{
 		"startTimestamp": startTimestamp,
 		"endTimestamp":   endTimestamp,
-		"status":         constant.ApptStatus_Unstarted_Unconfirmed,
+		"status":         constant.ApptStatus_Unstarted,
 	}
 	cursor, err := db.Query(ctx, query, bindVars)
 	defer func() {
@@ -60,7 +60,7 @@ func GetAndConfirmApptsByEndTimestamp(ctx context.Context, startTimestamp, endTi
 	bindVars := map[string]interface{}{
 		"startTimestamp": startTimestamp,
 		"endTimestamp":   endTimestamp,
-		"status":         constant.ApptStatus_End_Unconfirmed,
+		"status":         constant.ApptStatus_End,
 	}
 	cursor, err := db.Query(ctx, query, bindVars)
 	defer func() {
@@ -113,7 +113,7 @@ func UpdateAppointment(ctx context.Context, key string, appt *model.Appointment)
 // 1. 檢查 schedule 預約人數是否已經達到上限
 //
 // 2. 檢查 consumer 在相同時段中是否已經有其他的 appointment 存在
-//
+
 // 3. 建立 appointment 並更新 schedule 統計人數
 //
 // @param appt
@@ -216,10 +216,4 @@ func CreateAppointment(appt *model.Appointment) int {
 	}
 
 	return 0
-}
-
-func closeCursor(cursor driver.Cursor) {
-	if err := cursor.Close(); err != nil {
-		logger.Errorf("[ArangoDB] close cursor failed: %v", err)
-	}
 }
