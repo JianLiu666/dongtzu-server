@@ -2,6 +2,7 @@ package arangodb
 
 import (
 	"context"
+	"dongtzu/pkg/model"
 	"testing"
 
 	"github.com/arangodb/go-driver"
@@ -10,6 +11,8 @@ import (
 )
 
 func TestCreateAppointment(t *testing.T) {
+	logger.Init("debug")
+
 	conn, err := http.NewConnection(http.ConnectionConfig{
 		Endpoints: []string{"http://127.0.0.1:8529/"},
 	})
@@ -32,8 +35,18 @@ func TestCreateAppointment(t *testing.T) {
 		return
 	}
 
-	// appt := &model.Appointment{
-	// 	ID:         "",
-	// 	ProviderID: "1",
-	// }
+	appt := &model.Appointment{
+		ID:             "",
+		ProviderID:     "1",
+		ScheduleID:     "103847",
+		ConsumerID:     "1",
+		FeedbackID:     "",
+		StartTimestamp: 1623776400,
+		EndTimestamp:   1623780000,
+		Note:           "",
+		Status:         0,
+	}
+
+	status := CreateAppointment(appt)
+	logger.Debugf("%v", status)
 }

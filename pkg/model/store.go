@@ -1,14 +1,22 @@
 package model
 
+type Provider struct {
+	ID string `json:"_key,omitempty"` // increment unique key
+}
+
+type Consumer struct {
+	ID string `json:"_key,omitempty"` // increment unique key
+}
+
 type ClassRoom struct {
-	ID        string `json:"_key"`       // increment unique key
-	SchduleID string `json:"scheduleId"` // document reference key
-	Title     string `json:"title"`      // 課程標題
-	Content   string `json:"content"`    // 課程內容
+	ID        string `json:"_key,omitempty"` // increment unique key
+	SchduleID string `json:"scheduleId"`     // document reference key
+	Title     string `json:"title"`          // 課程標題
+	Content   string `json:"content"`        // 課程內容
 }
 
 type Schedule struct {
-	ID               string `json:"_key"`             // increment unique key
+	ID               string `json:"_key,omitempty"`   // increment unique key
 	ProviderID       string `json:"providerId"`       // document reference key
 	StartTimestamp   int64  `json:"startTimestamp"`   // 預約開始時間
 	EndTimestamp     int64  `json:"endTimestamp"`     // 預約結束時間
@@ -19,7 +27,7 @@ type Schedule struct {
 }
 
 type Appointment struct {
-	ID             string `json:"_key"`           // increment unique key
+	ID             string `json:"_key,omitempty"` // increment unique key
 	ProviderID     string `json:"providerId"`     // document reference key
 	ScheduleID     string `json:"scheduleId"`     // document reference key
 	ConsumerID     string `json:"consumerId"`     // document reference key
@@ -31,9 +39,9 @@ type Appointment struct {
 }
 
 type Feedback struct {
-	ID            string `json:"_key"`          // increment unique key
-	SchduleID     string `json:"scheduleId"`    // document reference key
-	AppointmentID string `json:"appointmentId"` // document reference key
-	Title         string `json:"title"`         // 回饋標題
-	Content       string `json:"content"`       // 回饋內容
+	ID            string `json:"_key,omitempty"` // increment unique key
+	SchduleID     string `json:"scheduleId"`     // document reference key
+	AppointmentID string `json:"appointmentId"`  // document reference key
+	Title         string `json:"title"`          // 回饋標題
+	Content       string `json:"content"`        // 回饋內容
 }

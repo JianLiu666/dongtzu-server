@@ -119,7 +119,7 @@ func CreateAppointment(appt *model.Appointment) int {
 		ctx,
 		driver.TransactionCollections{
 			Read:  []string{"Schedules"},
-			Write: []string{"Appointments"},
+			Write: []string{"Schedules", "Appointments"},
 		},
 		nil,
 	)
@@ -132,7 +132,7 @@ func CreateAppointment(appt *model.Appointment) int {
 	// 取得 consumer 在指定時間區段內的 appointments
 	cursor1, err := db.Query(
 		trxCtx,
-		"FOR d IN Appointments FILTER d._key == @consumerId AND d.startTimestamp >= @startTimestamp AND d.startTimestamp < @endTimestamp RETURN d",
+		"FOR d IN Appointments FILTER d.consumerId == @consumerId AND d.startTimestamp >= @startTimestamp AND d.startTimestamp < @endTimestamp RETURN d",
 		map[string]interface{}{
 			"consumerId":     appt.ConsumerID,
 			"startTimestamp": appt.StartTimestamp,
@@ -150,16 +150,14 @@ func CreateAppointment(appt *model.Appointment) int {
 
 	// 檢查 consumer 在指定時間區段內是否已經有其他的 appointment 存在
 	// 若有則表示預約衝突, 中斷 transaction
-	var tmp interface{}
+	tmp := &model.Appointment{}
 	_, err = cursor1.ReadDocument(ctx, tmp)
 	if !driver.IsNoMoreDocuments(err) {
-		logger.Debugf("[ArangoDB][CreateAppointment] consumer %s has other appointments already.", appt.ConsumerID)
-		if err = db.AbortTransaction(ctx, trxId, nil); err != nil {
-			logger.Errorf("[ArangoDB][CreateAppointment] abort transaction failed: %s", err)
+		if err == nil {
+			logger.Debugf("[ArangoDB][CreateAppointment] consumer %s has other appointments already.", appt.ConsumerID)
+		} else {
+			logger.Errorf("[ArangoDB][CreateAppointment] read document failed: %s", err)
 		}
-		return 1
-	} else if err != nil {
-		logger.Errorf("[ArangoDB][CreateAppointment] read document failed: %s", err)
 		if err = db.AbortTransaction(ctx, trxId, nil); err != nil {
 			logger.Errorf("[ArangoDB][CreateAppointment] abort transaction failed: %s", err)
 		}
@@ -167,8 +165,8 @@ func CreateAppointment(appt *model.Appointment) int {
 	}
 
 	// 取得 schedule
-	var result *model.Schedule
-	scheduleCol, _ := db.Collection(trxCtx, "Schedule")
+	result := &model.Schedule{}
+	scheduleCol, _ := db.Collection(trxCtx, "Schedules")
 	_, err = scheduleCol.ReadDocument(trxCtx, appt.ScheduleID, result)
 	if err != nil {
 		logger.Errorf("[ArangoDB][CreateAppointment] read document failed: %s", err)
