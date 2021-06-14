@@ -109,9 +109,16 @@ func UpdateAppointment(ctx context.Context, key string, appt *model.Appointment)
 }
 
 // 建立預約
+//
 // 1. 檢查 schedule 預約人數是否已經達到上限
+//
 // 2. 檢查 consumer 在相同時段中是否已經有其他的 appointment 存在
+//
 // 3. 建立 appointment 並更新 schedule 統計人數
+//
+// @param appt
+//
+// @return int status code
 func CreateAppointment(appt *model.Appointment) int {
 	ctx := context.TODO()
 
@@ -125,7 +132,7 @@ func CreateAppointment(appt *model.Appointment) int {
 	)
 	if err != nil {
 		logger.Errorf("[ArangoDB][CreateAppointment] begin transaction failed: %s", err)
-		return 1
+		return constant.ArangoDB_Driver_Failed
 	}
 	trxCtx := driver.WithTransactionID(ctx, trxId)
 
@@ -145,7 +152,7 @@ func CreateAppointment(appt *model.Appointment) int {
 		if err = db.AbortTransaction(ctx, trxId, nil); err != nil {
 			logger.Errorf("[ArangoDB][CreateAppointment] abort transaction failed: %s", err)
 		}
-		return 1
+		return constant.ArangoDB_Driver_Failed
 	}
 
 	// 檢查 consumer 在指定時間區段內是否已經有其他的 appointment 存在
@@ -160,8 +167,9 @@ func CreateAppointment(appt *model.Appointment) int {
 		}
 		if err = db.AbortTransaction(ctx, trxId, nil); err != nil {
 			logger.Errorf("[ArangoDB][CreateAppointment] abort transaction failed: %s", err)
+			return constant.ArangoDB_Driver_Failed
 		}
-		return 1
+		return constant.ArangoDB_Invalid_Operation
 	}
 
 	// 取得 schedule
@@ -173,7 +181,7 @@ func CreateAppointment(appt *model.Appointment) int {
 		if err = db.AbortTransaction(ctx, trxId, nil); err != nil {
 			logger.Errorf("[ArangoDB][CreateAppointment] abort transaction failed: %s", err)
 		}
-		return 1
+		return constant.ArangoDB_Driver_Failed
 	}
 
 	// 確保 schedule 人數尚未達到規定上限
@@ -181,8 +189,9 @@ func CreateAppointment(appt *model.Appointment) int {
 		logger.Debugf("[ArangoDB][CreateAppointment] schedule %s is fulled.", appt.ScheduleID)
 		if err = db.AbortTransaction(ctx, trxId, nil); err != nil {
 			logger.Errorf("[ArangoDB][CreateAppointment] abort transaction failed: %s", err)
+			return constant.ArangoDB_Driver_Failed
 		}
-		return 1
+		return constant.ArangoDB_Invalid_Operation
 	}
 
 	// 更新 schedule 預約人數
@@ -190,7 +199,7 @@ func CreateAppointment(appt *model.Appointment) int {
 	_, err = scheduleCol.UpdateDocument(trxCtx, result.ID, map[string]interface{}{"count": result.Count})
 	if err != nil {
 		logger.Errorf("[ArangoDB][CreateAppointment] update document failed: %s", err)
-		return 1
+		return constant.ArangoDB_Driver_Failed
 	}
 
 	// 寫入 appointment
@@ -198,12 +207,12 @@ func CreateAppointment(appt *model.Appointment) int {
 	_, err = apptCol.CreateDocument(trxCtx, appt)
 	if err != nil {
 		logger.Errorf("[ArangoDB][CreateAppointment] create document failed: %s", err)
-		return 1
+		return constant.ArangoDB_Driver_Failed
 	}
 
 	if err = db.CommitTransaction(ctx, trxId, nil); err != nil {
 		logger.Errorf("[ArangoDB][CreateAppointment] commit transaction failed: %s", err)
-		return 1
+		return constant.ArangoDB_Driver_Failed
 	}
 
 	return 0
