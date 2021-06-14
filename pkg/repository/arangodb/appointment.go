@@ -21,7 +21,7 @@ func GetAndConfirmApptsByStartTimestamp(ctx context.Context, startTimestamp, end
 	bindVars := map[string]interface{}{
 		"startTimestamp": startTimestamp,
 		"endTimestamp":   endTimestamp,
-		"status":         constant.ApptStatus_Unstarted,
+		"status":         constant.ApptStatus_Unsend_MeetingUrl,
 	}
 	cursor, err := db.Query(ctx, query, bindVars)
 	defer func() {
@@ -60,7 +60,7 @@ func GetAndConfirmApptsByEndTimestamp(ctx context.Context, startTimestamp, endTi
 	bindVars := map[string]interface{}{
 		"startTimestamp": startTimestamp,
 		"endTimestamp":   endTimestamp,
-		"status":         constant.ApptStatus_End,
+		"status":         constant.ApptStatus_Unsend_FeedbackUrl,
 	}
 	cursor, err := db.Query(ctx, query, bindVars)
 	defer func() {

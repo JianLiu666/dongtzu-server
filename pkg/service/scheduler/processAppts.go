@@ -29,17 +29,21 @@ func sendMeetingUrl(appt *model.Appointment) {
 		// 異常情形
 		logger.Errorf("[Scheduler] wrong tatus error: %v", appt.Status)
 
-	case constant.ApptStatus_Unstarted:
-		// 1. 傳送 MeetingUrl 到指定頻道
-		// 2. 押到 ApptStatus_Starting
-		appt.Status = constant.ApptStatus_Starting
-		arangodb.UpdateAppointment(context.TODO(), appt.ID, appt)
-
-	case constant.ApptStatus_Starting:
+	case constant.ApptStatus_Cancelled:
 		// 異常情形
 		logger.Errorf("[Scheduler] wrong tatus error: %v", appt.Status)
 
-	case constant.ApptStatus_End:
+	case constant.ApptStatus_Unsend_MeetingUrl:
+		// 1. 傳送 MeetingUrl 到指定頻道
+		// 2. 押到 ApptStatus_Unsend_FeedbackUrl
+		appt.Status = constant.ApptStatus_Unsend_FeedbackUrl
+		arangodb.UpdateAppointment(context.TODO(), appt.ID, appt)
+
+	case constant.ApptStatus_Unsend_FeedbackUrl:
+		// 異常情形
+		logger.Errorf("[Scheduler] wrong tatus error: %v", appt.Status)
+
+	case constant.ApptStatus_Unverified:
 		// 異常情形
 		logger.Errorf("[Scheduler] wrong tatus error: %v", appt.Status)
 
@@ -59,15 +63,21 @@ func sendFeedbackUrl(appt *model.Appointment) {
 		// 異常情形
 		logger.Errorf("[Scheduler] wrong tatus error: %v", appt.Status)
 
-	case constant.ApptStatus_Unstarted:
+	case constant.ApptStatus_Cancelled:
 		// 異常情形
 		logger.Errorf("[Scheduler] wrong tatus error: %v", appt.Status)
 
-	case constant.ApptStatus_Starting:
+	case constant.ApptStatus_Unsend_MeetingUrl:
 		// 異常情形
 		logger.Errorf("[Scheduler] wrong tatus error: %v", appt.Status)
 
-	case constant.ApptStatus_End:
+	case constant.ApptStatus_Unsend_FeedbackUrl:
+		// 1. 傳送 FeedbackUrl 到指定頻道
+		// 2. 押到 ApptStatus_Unverified
+
+	case constant.ApptStatus_Unverified:
+		// 異常情形
+		logger.Errorf("[Scheduler] wrong tatus error: %v", appt.Status)
 
 	case constant.ApptStatus_Varified:
 		// 異常情形
