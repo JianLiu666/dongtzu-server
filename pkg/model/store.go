@@ -5,11 +5,17 @@ type Provider struct {
 	LineUserID  string `json:"lineUserId"`     // unique line user id (e.g. U1234567890abcdef1234567890abcdef)
 	RealName    string `json:"realName"`       // 中文姓名(真實)
 	LineAtName  string `json:"lineAtName"`     // 申請Line官方帳號名稱
-	LineAtID    string `json:"LineAtID"`       // 申請Line官方帳號ID
+	LineAtID    string `json:"LineAtID"`       // 申請Line官方帳號ID(暫不實作)
 	CountryCode string `json:"countryCode"`    // 手機國碼(暫不實作)
+	LineID      string `json:"lineID"`         // 聯絡的Line ID
 	PhoneNum    string `json:"phoneNum"`       // 手機號碼
 	GmailAddr   string `json:"gamilAddr"`      // Gamil
-	InviteCode  string `json:"inviteCode"`     // 企業用戶，業務推廣碼
+	GCalSync    bool   `json:"GCalSync"`       // Google Calendar 授權成功
+	// Todo 應該還有個google calendar 授權成功拿到的token
+	InviteCode  string `json:"inviteCode"`  // 企業用戶，業務推廣碼
+	MemeberTerm bool   `json:"memeberTerm"` // 會員條款
+	PrivacyTerm bool   `json:"privacyTerm"` // 隱私全條款
+	Status      int    `json:"status"`      // 狀態 0: 暫存, 1: 確認送出, 2: 審核中, 3: 審核完成, 4: 審核不通過, 5: 例外處理
 }
 
 type Consumer struct {

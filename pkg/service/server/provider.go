@@ -21,15 +21,33 @@ type GetProviderInfoRes struct {
 }
 
 type RegisterProviderReq struct {
-}
-
-type RegisterProviderRes struct {
+	LineUserID  string `json:"lineUserId"`
+	RealName    string `json:"realName"`
+	LineID      string `json:"lineId"`
+	LineAtName  string `json:"lineAtName"`
+	LineAtID    string `json:"LineAtID"`
+	CountryCode string `json:"countryCode"`
+	PhoneNum    string `json:"phoneNum"`
+	GmailAddr   string `json:"gmailAddr"`
+	InivteCode  string `json:"inivteCode"`
+	MemeberTerm bool   `json:"memeberTerm"`
+	PrivacyTerm bool   `json:"privacyTerm"`
+	Status      int    `json:"status"`
 }
 
 type UpdateProviderInfoReq struct {
+	RealName    string `json:"realName"`
+	LineID      string `json:"lineId"`
+	LineAtName  string `json:"lineAtName"`
+	LineAtID    string `json:"LineAtID"`
+	CountryCode string `json:"countryCode"`
+	PhoneNum    string `json:"phoneNum"`
+	GmailAddr   string `json:"gmailAddr"`
+	Status      int    `json:"status"`
 }
 
-type UpdateProviderInfoRes struct {
+type RegisterOrUpdateProviderRes struct {
+	StatusCode string `json:"status"`
 }
 
 func GetProviderInfo() fiber.Handler {
@@ -62,12 +80,20 @@ func GetProviderInfo() fiber.Handler {
 
 func RegisterProvider() fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		// 1. parsing post body
+		// 2. register provider tx
+		//		- get provider from lineUserId && status
+		//      - deal with the provider from get result
+		//      - create provider file
 		return nil
 	}
 }
 
 func UpdateProviderInfo() fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		// 1. parsing put body
+		// 2. update provider profile
+		// 3. if params status is 2 && update success -> notify notion
 		return nil
 	}
 }
