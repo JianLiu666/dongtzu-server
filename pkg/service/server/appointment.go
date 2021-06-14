@@ -13,6 +13,7 @@ func appointment() fiber.Handler {
 		// 3. 檢查 Consumer 在相同時段中是否已經有其他的 appointment 存在
 		// 4. 建立 appointment, 並更新 schedule 統計人數
 		// ---- tx end
+
 		return nil
 	}
 }

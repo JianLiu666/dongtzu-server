@@ -12,10 +12,10 @@ var (
 )
 
 type config struct {
-	Fiber    fiberConfig
-	ArangoDB arangoConfig
-	LineBot  lineBotConfig
-	Zoom     zoomConfig
+	Fiber    FiberConfig
+	ArangoDB ArangoConfig
+	LineBot  LineBotConfig
+	Zoom     ZoomConfig
 }
 
 func NewFromViper() (*config, error) {

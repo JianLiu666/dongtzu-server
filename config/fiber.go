@@ -1,5 +1,5 @@
 package config
 
-type fiberConfig struct {
+type FiberConfig struct {
 	Port string `yaml:"port,omitempty"`
 }

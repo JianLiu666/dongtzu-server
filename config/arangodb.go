@@ -1,6 +1,6 @@
 package config
 
-type arangoConfig struct {
+type ArangoConfig struct {
 	Addr             string `yaml:"addr,omitempty"`
 	DBName           string `yaml:"dbName,omitempty"`
 	Username         string `yaml:"username,omitempty"`
