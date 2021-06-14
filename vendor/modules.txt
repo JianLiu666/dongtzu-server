@@ -1,0 +1,115 @@
+# github.com/andybalholm/brotli v1.0.2
+github.com/andybalholm/brotli
+# github.com/arangodb/go-driver v0.0.0-20210608063820-cd7131034c24
+## explicit
+github.com/arangodb/go-driver
+github.com/arangodb/go-driver/cluster
+github.com/arangodb/go-driver/http
+github.com/arangodb/go-driver/util
+# github.com/arangodb/go-velocypack v0.0.0-20200318135517-5af53c29c67e
+github.com/arangodb/go-velocypack
+# github.com/fsnotify/fsnotify v1.4.7
+github.com/fsnotify/fsnotify
+# github.com/gofiber/adaptor/v2 v2.1.6
+## explicit
+github.com/gofiber/adaptor/v2
+# github.com/gofiber/fiber/v2 v2.12.0
+## explicit
+github.com/gofiber/fiber/v2
+github.com/gofiber/fiber/v2/internal/bytebufferpool
+github.com/gofiber/fiber/v2/internal/colorable
+github.com/gofiber/fiber/v2/internal/encoding/ascii
+github.com/gofiber/fiber/v2/internal/encoding/json
+github.com/gofiber/fiber/v2/internal/isatty
+github.com/gofiber/fiber/v2/internal/schema
+github.com/gofiber/fiber/v2/internal/uuid
+github.com/gofiber/fiber/v2/utils
+# github.com/gofiber/utils v0.1.2
+github.com/gofiber/utils
+# github.com/hashicorp/hcl v1.0.0
+github.com/hashicorp/hcl
+github.com/hashicorp/hcl/hcl/ast
+github.com/hashicorp/hcl/hcl/parser
+github.com/hashicorp/hcl/hcl/printer
+github.com/hashicorp/hcl/hcl/scanner
+github.com/hashicorp/hcl/hcl/strconv
+github.com/hashicorp/hcl/hcl/token
+github.com/hashicorp/hcl/json/parser
+github.com/hashicorp/hcl/json/scanner
+github.com/hashicorp/hcl/json/token
+# github.com/inconshreveable/mousetrap v1.0.0
+github.com/inconshreveable/mousetrap
+# github.com/klauspost/compress v1.12.2
+github.com/klauspost/compress/flate
+github.com/klauspost/compress/gzip
+github.com/klauspost/compress/zlib
+# github.com/line/line-bot-sdk-go v7.8.0+incompatible
+## explicit
+github.com/line/line-bot-sdk-go/linebot
+# github.com/magiconair/properties v1.8.1
+github.com/magiconair/properties
+# github.com/mitchellh/mapstructure v1.1.2
+github.com/mitchellh/mapstructure
+# github.com/pelletier/go-toml v1.2.0
+github.com/pelletier/go-toml
+# github.com/pkg/errors v0.9.1
+github.com/pkg/errors
+# github.com/robfig/cron/v3 v3.0.1
+## explicit
+github.com/robfig/cron/v3
+# github.com/rs/xid v1.2.1
+github.com/rs/xid
+# github.com/spf13/afero v1.1.2
+github.com/spf13/afero
+github.com/spf13/afero/mem
+# github.com/spf13/cast v1.3.0
+github.com/spf13/cast
+# github.com/spf13/cobra v1.1.3
+## explicit
+github.com/spf13/cobra
+# github.com/spf13/jwalterweatherman v1.0.0
+github.com/spf13/jwalterweatherman
+# github.com/spf13/pflag v1.0.5
+github.com/spf13/pflag
+# github.com/spf13/viper v1.7.1
+## explicit
+github.com/spf13/viper
+# github.com/subosito/gotenv v1.2.0
+github.com/subosito/gotenv
+# github.com/valyala/bytebufferpool v1.0.0
+github.com/valyala/bytebufferpool
+# github.com/valyala/fasthttp v1.26.0
+## explicit
+github.com/valyala/fasthttp
+github.com/valyala/fasthttp/fasthttpadaptor
+github.com/valyala/fasthttp/fasthttputil
+github.com/valyala/fasthttp/reuseport
+github.com/valyala/fasthttp/stackless
+# github.com/valyala/tcplisten v1.0.0
+github.com/valyala/tcplisten
+# gitlab.geax.io/demeter/gologger v1.0.0
+## explicit
+gitlab.geax.io/demeter/gologger/constants
+gitlab.geax.io/demeter/gologger/env
+gitlab.geax.io/demeter/gologger/gracefulshutdown
+gitlab.geax.io/demeter/gologger/logger
+gitlab.geax.io/demeter/gologger/logger/heavenlogger
+gitlab.geax.io/demeter/gologger/logger/heavenlogger/stack
+gitlab.geax.io/demeter/gologger/logger/zaphdr
+gitlab.geax.io/demeter/gologger/logger/zaphdr/stack
+gitlab.geax.io/demeter/gologger/logger/zaphdr/stack/bufferpool
+gitlab.geax.io/demeter/gologger/slackAlert
+gitlab.geax.io/demeter/gologger/util/color
+# go.uber.org/zap v1.16.0
+go.uber.org/zap/buffer
+# golang.org/x/sys v0.0.0-20210514084401-e8d321eab015
+golang.org/x/sys/internal/unsafeheader
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# golang.org/x/text v0.3.6
+golang.org/x/text/transform
+golang.org/x/text/unicode/norm
+# gopkg.in/ini.v1 v1.51.0
+gopkg.in/ini.v1
+# gopkg.in/yaml.v2 v2.4.0
+gopkg.in/yaml.v2

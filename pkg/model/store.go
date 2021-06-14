@@ -1,5 +1,10 @@
 package model
 
+type Provider struct {
+	ID         string `json:"_key"`       // increment unique key
+	LineUserID string `json:"lineUserId"` // line user id (e.g. U1234567890abcdef1234567890abcdef)
+}
+
 type ClassRoom struct {
 	ID        string `json:"_key"`       // increment unique key
 	SchduleID string `json:"scheduleId"` // document reference key
