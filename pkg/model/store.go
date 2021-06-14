@@ -1,16 +1,18 @@
 package model
 
 type Provider struct {
-	ID          string `json:"_key,omitempty"` // increment unique key
-	LineUserID  string `json:"lineUserId"`     // unique line user id (e.g. U1234567890abcdef1234567890abcdef)
-	RealName    string `json:"realName"`       // 中文姓名(真實)
-	LineAtName  string `json:"lineAtName"`     // 申請Line官方帳號名稱
-	LineAtID    string `json:"LineAtID"`       // 申請Line官方帳號ID(暫不實作)
-	CountryCode string `json:"countryCode"`    // 手機國碼(暫不實作)
-	LineID      string `json:"lineID"`         // 聯絡的Line ID
-	PhoneNum    string `json:"phoneNum"`       // 手機號碼
-	GmailAddr   string `json:"gamilAddr"`      // Gamil
-	GCalSync    bool   `json:"GCalSync"`       // Google Calendar 授權成功
+	ID                 string `json:"_key,omitempty"`     // increment unique key
+	LineUserID         string `json:"lineUserId"`         // uniq Line userID (e.g. U123xxxxxxxxdef)
+	RealName           string `json:"realName"`           // 中文姓名(真實)
+	LineAtName         string `json:"lineAtName"`         // 申請Line官方帳號名稱
+	LineAtID           string `json:"LineAtID"`           // 申請Line官方帳號ID(Todo 暫不實作)
+	CountryCode        string `json:"countryCode"`        // 手機國碼(Todo 暫不實作)
+	LineID             string `json:"lineID"`             // 聯絡的個人Line ID
+	PhoneNum           string `json:"phoneNum"`           // 手機號碼
+	ConfirmedPhoneNum  string `json:"ConfirmedPhoneNum"`  // 認證過的手機號碼(Todo 二階段手機驗證)
+	GmailAddr          string `json:"gamilAddr"`          // Gamil
+	ConfirmedGmailAddr string `json:"ConfirmedGmailAddr"` // 認證過的Gamil(Todo 發認證信)
+	GCalSync           bool   `json:"GCalSync"`           // Google Calendar 授權成功
 	// Todo 應該還有個google calendar 授權成功拿到的token
 	InviteCode  string `json:"inviteCode"`  // 企業用戶，業務推廣碼
 	MemeberTerm bool   `json:"memeberTerm"` // 會員條款

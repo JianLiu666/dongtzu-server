@@ -89,6 +89,10 @@ func RegisterProvider() fiber.Handler {
 	}
 }
 
+// Todo
+// - 1. 之後再實作手機修改簡訊驗證邏輯
+// - 2. 之後再實作gmail修改email + calendar同步邏輯
+// 目前只實做完全信任前端覆蓋資料的邏輯
 func UpdateProviderInfo() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// 1. parsing put body
