@@ -1,7 +1,8 @@
 package model
 
 type Provider struct {
-	ID string `json:"_key,omitempty"` // increment unique key
+	ID         string `json:"_key,omitempty"` // increment unique key
+	LineUserID string `json:"lineUserId"`     // line user id (e.g. U1234567890abcdef1234567890abcdef)
 }
 
 type Consumer struct {
