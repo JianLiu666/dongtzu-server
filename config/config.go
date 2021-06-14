@@ -12,6 +12,7 @@ var (
 )
 
 type config struct {
+	Fiber    fiberConfig
 	ArangoDB arangoConfig
 	LineBot  lineBotConfig
 	Zoom     zoomConfig
