@@ -16,7 +16,7 @@ type RegisterProviderReq struct {
 	RealName    string `json:"realName"`
 	LineID      string `json:"lineId"`
 	LineAtName  string `json:"lineAtName"`
-	LineAtID    string `json:"LineAtID"`
+	LineAtID    string `json:"lineAtID"`
 	CountryCode string `json:"countryCode"`
 	PhoneNum    string `json:"phoneNum"`
 	GmailAddr   string `json:"gmailAddr"`

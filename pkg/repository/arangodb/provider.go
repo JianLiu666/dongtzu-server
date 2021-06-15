@@ -95,7 +95,7 @@ function (Params) {
 		return err
 	}
 
-	fmt.Printf("CreateProviderProfile TX execution resCode is : %v", resCode)
+	fmt.Println("CreateProviderProfile TX execution resCode is : %v", resCode)
 
 	return nil
 }
@@ -203,11 +203,12 @@ func formatUpdateProviderMap(providerInfo model.UpdateProviderInfoReq) (map[stri
 	delete(dataMap, "_key")
 	delete(dataMap, "inviteCode")
 	delete(dataMap, "lineUserId")
-	delete(dataMap, "emeberTerm")
-	delete(dataMap, "privacyTerm")
-	delete(dataMap, "privacyTerm")
 	delete(dataMap, "gCalSync")
 	delete(dataMap, "createdAt")
+	if providerInfo.Status != constant.ProviderStatusAuditing {
+		delete(dataMap, "memeberTerm")
+		delete(dataMap, "privacyTerm")
+	}
 
 	return dataMap, nil
 }

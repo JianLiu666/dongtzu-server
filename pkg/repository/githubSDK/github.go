@@ -16,24 +16,21 @@ type GithubIssue struct {
 	Label string `json:"label"`
 }
 
-func CreateIssueForProvider(title string, profile model.Provider) error {
+func CreateIssueForProvider(profile model.Provider) error {
 	// create issue to private repo
 	apiURL := config.GetGlobalConfig().Github.RepoURL
 
 	issueData := GithubIssue{
-		Title: title,
+		Title: fmt.Sprintf("DB編號%s註冊申請", profile.ID),
 		Body: fmt.Sprintf(`
-## DB編號%s註冊申請 
-
+以下是申請的相關資料，麻煩客服協助處理喔～
 1. 中文姓名(真實): %s
 2. 申請Line官方帳號名稱: %s
 3. 聯絡的個人Line ID: %s
 4. 手機號碼: %s
 5. Gamil: %s
 6. 邀請碼: %s
-
-以上是申請資料，麻煩客服協助處理喔～
-		`, profile.ID, profile.RealName, profile.LineAtName, profile.LineID,
+		`, profile.RealName, profile.LineAtName, profile.LineID,
 			profile.PhoneNum, profile.GmailAddr, profile.InviteCode),
 		Label: "help wanted",
 	}
