@@ -19,4 +19,5 @@ func Init() {
 	}
 
 	bot = b
+	logger.Debugf("[LineAPI] Initialized.")
 }

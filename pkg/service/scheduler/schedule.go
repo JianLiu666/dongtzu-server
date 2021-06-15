@@ -14,3 +14,7 @@ func updateScheduleAndCreateZoomUrl() {
 
 	_ = arangodb.UpdateSchedulesMeetingUrl(context.TODO(), schedules)
 }
+
+func createZoomMeetingUrl() string {
+	return ""
+}
