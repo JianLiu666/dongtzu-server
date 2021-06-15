@@ -1,4 +1,4 @@
-package lineapi
+package lineSDK
 
 import (
 	"dongtzu/config"
@@ -14,10 +14,10 @@ func Init() {
 		config.GetGlobalConfig().LineBot.ChannelSecret,
 		config.GetGlobalConfig().LineBot.ChannelAccessToken)
 	if err != nil {
-		logger.Errorf("[LineAPI] Init line bot failed: %v", err)
+		logger.Errorf("[LineSDK] Init line bot failed: %v", err)
 		return
 	}
 
 	bot = b
-	logger.Debugf("[LineAPI] Initialized.")
+	logger.Debugf("[LineSDK] Initialized.")
 }

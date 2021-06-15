@@ -1,4 +1,4 @@
-package zoomapi
+package zoomSDK
 
 func CreateMeetingUrl() string {
 	// _, err := zoom.CreateMeeting()

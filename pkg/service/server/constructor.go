@@ -2,7 +2,7 @@ package server
 
 import (
 	"dongtzu/config"
-	"dongtzu/pkg/repository/lineapi"
+	"dongtzu/pkg/repository/lineSDK"
 
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
@@ -15,7 +15,7 @@ func Init() {
 	defer logger.Debugf("[Server] Initialized.")
 
 	server = fiber.New()
-	server.Post("/line/webhook", adaptor.HTTPHandlerFunc(lineapi.WebhookCallback))
+	server.Post("/line/webhook", adaptor.HTTPHandlerFunc(lineSDK.WebhookCallback))
 
 	dt := server.Group("/dt")
 	dt.Post("/appointment", appointment())

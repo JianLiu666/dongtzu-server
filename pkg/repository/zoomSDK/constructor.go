@@ -1,4 +1,4 @@
-package zoomapi
+package zoomSDK
 
 import (
 	"dongtzu/config"
@@ -10,7 +10,7 @@ import (
 var zoom zoomAPI.Client
 
 func Init() {
-	defer logger.Debugf("[ZoomAPI] Initialized.")
+	defer logger.Debugf("[ZoomSDK] Initialized.")
 
 	zoom = zoomAPI.NewClient(
 		config.GetGlobalConfig().Zoom.BaseUrl,
