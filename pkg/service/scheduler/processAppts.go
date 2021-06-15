@@ -50,6 +50,6 @@ func processReadyDismissAppts() {
 			appt.Status = constant.ApptStatus_Unverified
 		}
 
-		_ = arangodb.UpdateApptsStatus(context.TODO(), appts, constant.ApptStatus_Unsend_FeedbackUrl)
+		_ = arangodb.UpdateApptsStatus(context.TODO(), appts, constant.ApptStatus_Unverified)
 	}
 }
