@@ -16,6 +16,7 @@ type config struct {
 	ArangoDB ArangoConfig  `yaml:"arangoDB,omitempty"`
 	LineBot  LineBotConfig `yaml:"linebot,omitempty"`
 	Zoom     ZoomConfig    `yaml:"zoom,omitempty"`
+	Github   GithubConfig  `yaml:"github,omitempty"`
 }
 
 func NewFromViper() (*config, error) {

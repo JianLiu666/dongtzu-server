@@ -2,59 +2,23 @@ package server
 
 import (
 	"context"
+	"dongtzu/constant"
 	"dongtzu/pkg/model"
 	"dongtzu/pkg/repository/arangodb"
+	"dongtzu/pkg/repository/githubSDK"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/valyala/fasthttp"
+	"gitlab.geax.io/demeter/gologger/logger"
 )
-
-type ErrRes struct {
-	Code       string `json:"code"`    // 系統自定義錯誤代碼
-	StatusCode string `json:"status"`  // http 狀態碼
-	Message    string `json:"message"` // 錯誤訊息
-}
-
-type GetProviderInfoRes struct {
-	StatusCode string          `json:"statusCode"`
-	Data       *model.Provider `json:"data"`
-}
-
-type RegisterProviderReq struct {
-	LineUserID  string `json:"lineUserId"`
-	RealName    string `json:"realName"`
-	LineID      string `json:"lineId"`
-	LineAtName  string `json:"lineAtName"`
-	LineAtID    string `json:"LineAtID"`
-	CountryCode string `json:"countryCode"`
-	PhoneNum    string `json:"phoneNum"`
-	GmailAddr   string `json:"gmailAddr"`
-	InivteCode  string `json:"inivteCode"`
-	MemeberTerm bool   `json:"memeberTerm"`
-	PrivacyTerm bool   `json:"privacyTerm"`
-	Status      int    `json:"status"`
-}
-
-type UpdateProviderInfoReq struct {
-	RealName    string `json:"realName"`
-	LineID      string `json:"lineId"`
-	LineAtName  string `json:"lineAtName"`
-	LineAtID    string `json:"LineAtID"`
-	CountryCode string `json:"countryCode"`
-	PhoneNum    string `json:"phoneNum"`
-	GmailAddr   string `json:"gmailAddr"`
-	Status      int    `json:"status"`
-}
-
-type RegisterOrUpdateProviderRes struct {
-	StatusCode string `json:"status"`
-}
 
 func GetProviderInfo() fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		fmt.Println("heyy??")
 		lineUserID := c.Params("lineUserId")
 		if lineUserID == "" {
-			return c.Status(fasthttp.StatusNotFound).JSON(ErrRes{
+			return c.Status(fasthttp.StatusNotFound).JSON(model.ErrRes{
 				Code:       "404001",
 				StatusCode: "404001",
 				Message:    "No given Line user ID",
@@ -64,14 +28,14 @@ func GetProviderInfo() fiber.Handler {
 		ctx := context.Background()
 		providerProfile, err := arangodb.GetProviderProfileByLineUserID(ctx, lineUserID)
 		if err != nil {
-			return c.Status(fasthttp.StatusInternalServerError).JSON(ErrRes{
+			return c.Status(fasthttp.StatusInternalServerError).JSON(model.ErrRes{
 				Code:       "500001",
 				StatusCode: "500001",
 				Message:    "SERVER_ERROR",
 			})
 		}
 
-		return c.Status(fasthttp.StatusOK).JSON(GetProviderInfoRes{
+		return c.Status(fasthttp.StatusOK).JSON(model.GetProviderInfoRes{
 			StatusCode: "200",
 			Data:       providerProfile,
 		})
@@ -81,11 +45,29 @@ func GetProviderInfo() fiber.Handler {
 func RegisterProvider() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// 1. parsing post body
+		var body model.RegisterProviderReq
+		if err := c.BodyParser(&body); err != nil {
+			return c.Status(fasthttp.StatusNotFound).JSON(model.ErrRes{
+				Code:       "404001",
+				StatusCode: "404001",
+				Message:    "No validate registeration input",
+			})
+		}
+
 		// 2. register provider tx
-		//		- get provider from lineUserId && status
-		//      - deal with the provider from get result
-		//      - create provider file
-		return nil
+		ctx := context.Background()
+		err := arangodb.CreateProviderProfile(ctx, body)
+		if err != nil {
+			return c.Status(fasthttp.StatusInternalServerError).JSON(model.ErrRes{
+				Code:       "500001",
+				StatusCode: "500001",
+				Message:    "SERVER_ERROR",
+			})
+		}
+
+		return c.Status(fasthttp.StatusOK).JSON(model.RegisterOrUpdateProviderRes{
+			StatusCode: "200001",
+		})
 	}
 }
 
@@ -95,9 +77,46 @@ func RegisterProvider() fiber.Handler {
 // 目前只實做完全信任前端覆蓋資料的邏輯
 func UpdateProviderInfo() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// 1. parsing put body
+		lineUserID := c.Params("lineUserId")
+		if lineUserID == "" {
+			return c.Status(fasthttp.StatusNotFound).JSON(model.ErrRes{
+				Code:       "404001",
+				StatusCode: "404001",
+				Message:    "No given Line user ID",
+			})
+		}
+
+		var body model.UpdateProviderInfoReq
+		if err := c.BodyParser(&body); err != nil {
+			return c.Status(fasthttp.StatusNotFound).JSON(model.ErrRes{
+				Code:       "404001",
+				StatusCode: "404001",
+				Message:    "No validate edit provider input",
+			})
+		}
+
 		// 2. update provider profile
-		// 3. if params status is 2 && update success -> notify notion
-		return nil
+		ctx := context.Background()
+		err := arangodb.UpdateProviderByLineUserID(ctx, lineUserID, body)
+		if err != nil {
+			return c.Status(fasthttp.StatusInternalServerError).JSON(model.ErrRes{
+				Code:       "500001",
+				StatusCode: "500001",
+				Message:    "SERVER_ERROR",
+			})
+		}
+
+		// 3. if params status is 2 && update success -> github 串接
+		if body.Status == constant.ProviderStatusAuditing {
+			profile, _ := arangodb.GetProviderProfileByLineUserID(ctx, lineUserID)
+			err = githubSDK.CreateIssueForProvider("", *profile)
+			if err != nil {
+				logger.Errorf("[githubSDK] create issue failure : %v", err)
+			}
+		}
+
+		return c.Status(fasthttp.StatusOK).JSON(model.RegisterOrUpdateProviderRes{
+			StatusCode: "200001",
+		})
 	}
 }

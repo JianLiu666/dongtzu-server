@@ -21,9 +21,9 @@ func Init() {
 	dt.Post("/appointment", appointment())
 
 	// Provider Registration
-	dt.Get("/provider/:lineUserId", GetProviderInfo())
-	dt.Post("/provider/register", RegisterProvider())
-	dt.Put("/provider/:lineUserId", UpdateProviderInfo())
+	dt.Get("/providers/:lineUserId", GetProviderInfo())
+	dt.Post("/providers/register", RegisterProvider())
+	dt.Put("/providers/:lineUserId", UpdateProviderInfo())
 }
 
 func Start() {
