@@ -10,7 +10,14 @@ import (
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
+// 取得所有尚未申請 MeetingUrl 的 Schedules
 // NOTE: 如果未來量過大時, 應該要分批撈取
+//
+// @param ctx
+//
+// @return []*model.Schedule
+//
+// @return int status code
 func GetWithoutMeetingUrlSchedules(ctx context.Context) ([]*model.Schedule, int) {
 	result := []*model.Schedule{}
 
@@ -46,6 +53,13 @@ func GetWithoutMeetingUrlSchedules(ctx context.Context) ([]*model.Schedule, int)
 	return result, constant.ArangoDB_Success
 }
 
+// 批次更新會議連結
+//
+// @param ctx
+//
+// @param docs
+//
+// @return int status code
 func UpdateSchedulesMeetingUrl(ctx context.Context, docs []*model.Schedule) int {
 	col, err := db.Collection(ctx, "Schedules")
 	if err != nil {
@@ -78,4 +92,90 @@ func UpdateSchedulesMeetingUrl(ctx context.Context, docs []*model.Schedule) int 
 	}
 
 	return constant.ArangoDB_Success
+}
+
+// 取得所有距離指定時間即將開始的 schedules
+//
+// @param ctx
+//
+// @param startTimestamp
+//
+// @return []*model.Schedule
+//
+// @return int status code
+func GetReadyStartSchedules(ctx context.Context, startTimestamp int64) ([]*model.Schedule, int) {
+	result := []*model.Schedule{}
+
+	query := `
+		FOR d IN Schedules 
+			FILTER d.meetingUrl != "" 
+				AND d.count >= d.minConsumerLimit 
+				AND d.startTimestamp == @startTimestamp 
+			RETURN d`
+	bindVars := map[string]interface{}{
+		"startTimestamp": startTimestamp,
+	}
+	cursor, err := db.Query(ctx, query, bindVars)
+	if err != nil {
+		logger.Errorf("[ArangoDB][GetReadyStartSchedules] query failed: %v", err)
+		return result, constant.ArangoDB_Driver_Failed
+	}
+
+	for {
+		doc := &model.Schedule{}
+		_, err := cursor.ReadDocument(ctx, doc)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			logger.Errorf("[ArangoDB][GetReadyStartSchedules] cursor failed: %v", err)
+			return result, constant.ArangoDB_Driver_Failed
+		}
+
+		result = append(result, doc)
+	}
+
+	return result, constant.ArangoDB_Success
+}
+
+// 取得所有距離指定時間即將結束的 schedules
+//
+// @param ctx
+//
+// @param endTimestamp
+//
+// @return []*model.Schedule
+//
+// @return int status code
+func GetReadyDismissSchedules(ctx context.Context, endTimestamp int64) ([]*model.Schedule, int) {
+	result := []*model.Schedule{}
+
+	query := `
+		FOR d IN Schedules 
+			FILTER d.meetingUrl != "" 
+				AND d.count >= d.minConsumerLimit 
+				AND d.endTimestamp == @endTimestamp 
+			RETURN d`
+	bindVars := map[string]interface{}{
+		"endTimestamp": endTimestamp,
+	}
+	cursor, err := db.Query(ctx, query, bindVars)
+	if err != nil {
+		logger.Errorf("[ArangoDB][GetReadyDismissSchedules] query failed: %v", err)
+		return result, constant.ArangoDB_Driver_Failed
+	}
+
+	for {
+		doc := &model.Schedule{}
+		_, err := cursor.ReadDocument(ctx, doc)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			logger.Errorf("[ArangoDB][GetReadyDismissSchedules] cursor failed: %v", err)
+			return result, constant.ArangoDB_Driver_Failed
+		}
+
+		result = append(result, doc)
+	}
+
+	return result, constant.ArangoDB_Success
 }

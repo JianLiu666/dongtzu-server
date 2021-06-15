@@ -49,6 +49,7 @@ type Appointment struct {
 	ScheduleID     string `json:"scheduleId"`     // document reference key
 	ConsumerID     string `json:"consumerId"`     // document reference key
 	FeedbackID     string `json:"feedbackId"`     // document reference key
+	ConsumerLineID string `json:"consumerLineId"` // Consumer Line UserId
 	StartTimestamp int64  `json:"startTimestamp"` // 預約開始時間
 	EndTimestamp   int64  `json:"endTimestamp"`   // 預約結束時間
 	Note           string `json:"note"`           // 備註 (json format)

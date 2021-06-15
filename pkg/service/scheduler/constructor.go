@@ -1,7 +1,6 @@
 package scheduler
 
 import (
-	"dongtzu/pkg/model"
 	"time"
 
 	"github.com/robfig/cron/v3"
@@ -9,18 +8,14 @@ import (
 )
 
 var manager *cron.Cron
-var timeWheelIdx int
-var startTimeWheel [60][]*model.Appointment
-var endTimeWheel [60][]*model.Appointment
 
 func Init() {
 	defer logger.Debugf("[Scheduler] Initialized.")
 
 	manager = cron.New()
-	addJob("example", "@every 1m", example)
-	addJob("updateScheduleAndCreateZoomUrl", "*/1 * * * *", updateScheduleAndCreateZoomUrl)
-	// addJob("getAndConfirmAppts", "0 25,55 * * * *", getAndConfirmAppts)
-	// addJob("processAppts", "0 10 * * * *", processAppts)
+	addJob("updateScheduleAndCreateMeetingUrl", "*/1 * * * *", updateScheduleAndCreateMeetingUrl)
+	addJob("processReadyStartAppts", "25,55 * * * *", processReadyStartAppts)
+	addJob("processReadyDismissAppts", "25,55 * * * *", processReadyDismissAppts)
 }
 
 func Start() {

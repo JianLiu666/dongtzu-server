@@ -19,3 +19,14 @@ func GetTimeRange() (int64, int64) {
 
 	return startTimestamp, endTimestamp
 }
+
+// 無條件進位到下個最近的半點時間
+//
+// @return int64 timestmap
+func GetTimestampRoundToNextHalf() int64 {
+	now := time.Now().UTC()
+	if now.Minute() < 30 {
+		return now.Round(time.Hour).Add(30 * time.Minute).UTC().Unix()
+	}
+	return now.Round(time.Hour).UTC().Unix()
+}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"dongtzu/constant"
 	"dongtzu/pkg/model"
-	"fmt"
 
 	"github.com/arangodb/go-driver"
 	"gitlab.geax.io/demeter/gologger/logger"
@@ -14,106 +13,12 @@ const (
 	CollectionAppointments = "Appointments"
 )
 
-func GetAndConfirmApptsByStartTimestamp(ctx context.Context, startTimestamp, endTimestamp int64) []*model.Appointment {
-	result := []*model.Appointment{}
-
-	query := fmt.Sprintf("FOR d IN %s FILTER d.startTimestamp >= @startTimestamp AND d.startTimestamp < @endTimestamp AND d.status == @status RETURN d", CollectionAppointments)
-	bindVars := map[string]interface{}{
-		"startTimestamp": startTimestamp,
-		"endTimestamp":   endTimestamp,
-		"status":         constant.ApptStatus_Unsend_MeetingUrl,
-	}
-	cursor, err := db.Query(ctx, query, bindVars)
-	defer func() {
-		if err := cursor.Close(); err != nil {
-			logger.Errorf("[ArangoDB] cursor close falied: %v", err)
-		}
-	}()
-
-	if err != nil {
-		logger.Errorf("[ArangoDB] GetAndConfirmApptsByStartTimestamp query falied: %v", err)
-		return []*model.Appointment{}
-	}
-
-	for {
-		var data model.Appointment
-		_, err := cursor.ReadDocument(ctx, &data)
-		if driver.IsNoMoreDocuments(err) {
-			break
-		} else if err != nil {
-			logger.Errorf("[ArangoDB] GetAndConfirmApptsByStartTimestamp cursor falied: %v", err)
-			return []*model.Appointment{}
-		}
-
-		result = append(result, &data)
-	}
-
-	// TODO: 這裡應該要再將這些 unconfirmed 的 status 押成 confirmed 後在寫回 db
-
-	return result
-}
-
-func GetAndConfirmApptsByEndTimestamp(ctx context.Context, startTimestamp, endTimestamp int64) []*model.Appointment {
-	result := []*model.Appointment{}
-
-	query := fmt.Sprintf("FOR d IN %s FILTER d.endTimestamp >= @startTimestamp AND d.endTimestamp < @endTimestamp AND d.status == @status RETURN d", CollectionAppointments)
-	bindVars := map[string]interface{}{
-		"startTimestamp": startTimestamp,
-		"endTimestamp":   endTimestamp,
-		"status":         constant.ApptStatus_Unsend_FeedbackUrl,
-	}
-	cursor, err := db.Query(ctx, query, bindVars)
-	defer func() {
-		if err := cursor.Close(); err != nil {
-			logger.Errorf("[ArangoDB] cursor close falied: %v", err)
-		}
-	}()
-
-	if err != nil {
-		logger.Errorf("[ArangoDB] GetAndConfirmApptsByEndTimestamp query falied: %v", err)
-		return []*model.Appointment{}
-	}
-
-	for {
-		var data model.Appointment
-		_, err := cursor.ReadDocument(ctx, &data)
-		if driver.IsNoMoreDocuments(err) {
-			break
-		} else if err != nil {
-			logger.Errorf("[ArangoDB] GetAndConfirmApptsByEndTimestamp cursor falied: %v", err)
-			return []*model.Appointment{}
-		}
-
-		result = append(result, &data)
-	}
-
-	// TODO: 這裡應該要再將這些 unconfirmed 的 status 押成 confirmed 後在寫回 db
-
-	return result
-}
-
-func UpdateAppointment(ctx context.Context, key string, appt *model.Appointment) {
-	col, err := db.Collection(ctx, CollectionAppointments)
-	if err != nil {
-		if err != nil {
-			logger.Errorf("[ArangoDB] UpdateAppointment falied: %v", err)
-			return
-		}
-	}
-
-	_, err = col.UpdateDocument(ctx, key, appt)
-	if err != nil {
-		logger.Errorf("[ArangoDB] UpdateAppointment falied: %v", err)
-		return
-	}
-}
-
 // 建立預約
 //
 // 1. 檢查 schedule 預約人數是否已經達到上限
 //
 // 2. 檢查 consumer 在相同時段中是否已經有其他的 appointment 存在
-
+//
 // 3. 建立 appointment 並更新 schedule 統計人數
 //
 // @param appt
@@ -216,4 +121,89 @@ func CreateAppointment(appt *model.Appointment) int {
 	}
 
 	return 0
+}
+
+// 取得與條件相符的預約
+//
+// @param scheduleId
+//
+// @param status
+//
+// @return []*model.Appointment
+//
+// @return int status code
+func GetApptsByScheduleIDAndStatus(ctx context.Context, scheduleId string, status int) ([]*model.Appointment, int) {
+	result := []*model.Appointment{}
+
+	query := `
+		FOR d IN Appointments
+			FILTER d.scheduleId == @scheduleId 
+				AND d.status == @status
+			RETURN d`
+	bindVars := map[string]interface{}{
+		"scheduleId": scheduleId,
+		"status":     status,
+	}
+	cursor, err := db.Query(ctx, query, bindVars)
+	defer closeCursor(cursor)
+	if err != nil {
+		logger.Errorf("[ArangoDB][GetApptsByScheduleIDAndStatus] query failed: %v", err)
+		return result, constant.ArangoDB_Driver_Failed
+	}
+
+	for {
+		doc := &model.Appointment{}
+		_, err := cursor.ReadDocument(ctx, doc)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			logger.Errorf("[ArangoDB][GetApptsByScheduleIDAndStatus] cursor failed: %v", err)
+			return result, constant.ArangoDB_Driver_Failed
+		}
+
+		result = append(result, doc)
+	}
+
+	return result, constant.ArangoDB_Success
+}
+
+// 批次更新預約
+//
+// @param docs
+//
+// @param checkStatus 檢查準備更新的狀態是否相符
+//
+// @return int status code
+func UpdateApptsStatus(ctx context.Context, docs []*model.Appointment, checkStatus int) int {
+	col, err := db.Collection(ctx, "Appointments")
+	if err != nil {
+		logger.Errorf("[ArangoDB][UpdateApptsStatus] get collection failed: %v", err)
+		return constant.ArangoDB_Driver_Failed
+	}
+
+	keys := []string{}
+	updates := []map[string]interface{}{}
+
+	for _, doc := range docs {
+		if doc.ID == "" {
+			logger.Warnf("[ArangoDB][UpdateApptsStatus] the doc without key: %v", doc)
+			continue
+		}
+		if doc.Status != int64(checkStatus) {
+			logger.Warnf("[ArangoDB][UpdateApptsStatus] the doc status is not equal to %v : %v", checkStatus, doc)
+			continue
+		}
+
+		keys = append(keys, doc.ID)
+		updates = append(updates, map[string]interface{}{
+			"status": doc.Status,
+		})
+	}
+	_, _, err = col.UpdateDocuments(ctx, keys, updates)
+	if err != nil {
+		logger.Errorf("[ArangoDB][UpdateApptsStatus] update documents failed: %v", err)
+		return constant.ArangoDB_Driver_Failed
+	}
+
+	return constant.ArangoDB_Success
 }

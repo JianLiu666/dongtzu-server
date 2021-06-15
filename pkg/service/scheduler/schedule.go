@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func updateScheduleAndCreateZoomUrl() {
+func updateScheduleAndCreateMeetingUrl() {
 	schedules, _ := arangodb.GetWithoutMeetingUrlSchedules(context.TODO())
 
 	for _, s := range schedules {
