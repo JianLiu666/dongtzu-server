@@ -3,17 +3,17 @@ package zoomSDK
 import (
 	"dongtzu/config"
 
-	"github.com/donvito/zoom-go/zoomAPI"
+	"github.com/himalayan-institute/zoom-lib-golang"
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
-var zoom zoomAPI.Client
+var client *zoom.Client
 
 func Init() {
 	defer logger.Debugf("[ZoomSDK] Initialized.")
 
-	zoom = zoomAPI.NewClient(
-		config.GetGlobalConfig().Zoom.BaseUrl,
-		config.GetGlobalConfig().Zoom.JwtToken,
+	client = zoom.NewClient(
+		config.GetGlobalConfig().Zoom.ApiKey,
+		config.GetGlobalConfig().Zoom.ApiSecret,
 	)
 }

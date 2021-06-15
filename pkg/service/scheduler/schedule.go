@@ -2,19 +2,25 @@ package scheduler
 
 import (
 	"context"
+	"dongtzu/constant"
 	"dongtzu/pkg/repository/arangodb"
+	"dongtzu/pkg/repository/zoomSDK"
+	"time"
 )
 
 func updateScheduleAndCreateZoomUrl() {
 	schedules, _ := arangodb.GetWithoutMeetingUrlSchedules(context.TODO())
+
 	for _, s := range schedules {
-		// TODO: 串 zoom api
-		s.MeetingUrl = "https://www.google.com/"
+		scheduleTime := time.Unix(s.StartTimestamp, 0)
+		minuteInteger := (s.EndTimestamp - s.StartTimestamp) / 60
+		meetingUrl, code := zoomSDK.GetMeetingUrl(scheduleTime, int(minuteInteger))
+
+		if code != constant.Zoom_Success {
+			continue
+		}
+		s.MeetingUrl = meetingUrl
 	}
 
 	_ = arangodb.UpdateSchedulesMeetingUrl(context.TODO(), schedules)
-}
-
-func createZoomMeetingUrl() string {
-	return ""
 }
