@@ -47,6 +47,6 @@ func TestCreateAppointment(t *testing.T) {
 		Status:         0,
 	}
 
-	status := CreateAppointment(appt)
+	status := CreateAppointment(context.TODO(), appt)
 	logger.Debugf("%v", status)
 }

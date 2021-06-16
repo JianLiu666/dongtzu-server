@@ -21,12 +21,12 @@ const (
 //
 // 3. 建立 appointment 並更新 schedule 統計人數
 //
+// @param ctx
+//
 // @param appt
 //
 // @return int status code
-func CreateAppointment(appt *model.Appointment) int {
-	ctx := context.TODO()
-
+func CreateAppointment(ctx context.Context, appt *model.Appointment) int {
 	trxId, err := db.BeginTransaction(
 		ctx,
 		driver.TransactionCollections{
@@ -189,7 +189,7 @@ func UpdateApptsStatus(ctx context.Context, docs []*model.Appointment, checkStat
 			logger.Warnf("[ArangoDB][UpdateApptsStatus] the doc without key: %v", doc)
 			continue
 		}
-		if doc.Status != int64(checkStatus) {
+		if doc.Status != checkStatus {
 			logger.Warnf("[ArangoDB][UpdateApptsStatus] the doc status is not equal to %v : %v", checkStatus, doc)
 			continue
 		}

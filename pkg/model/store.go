@@ -22,7 +22,9 @@ type Provider struct {
 }
 
 type Consumer struct {
-	ID string `json:"_key,omitempty"` // increment unique key
+	ID                  string `json:"_key,omitempty"`      // increment unique key
+	LineUserID          string `json:"lineUserId"`          // Line UserId
+	LineFollowingStatus int    `json:"lineFollowingStatus"` // Line following status
 }
 
 type ClassRoom struct {
@@ -37,9 +39,9 @@ type Schedule struct {
 	ProviderID       string `json:"providerId"`       // document reference key
 	StartTimestamp   int64  `json:"startTimestamp"`   // 預約開始時間
 	EndTimestamp     int64  `json:"endTimestamp"`     // 預約結束時間
-	MinConsumerLimit int64  `json:"minConsumerLimit"` // 最小開課人數下限
-	MaxConsumerLimit int64  `json:"maxConsumerLimit"` // 最大開課人數上限
-	Count            int64  `json:"count"`            // 目前參加人數
+	MinConsumerLimit int    `json:"minConsumerLimit"` // 最小開課人數下限
+	MaxConsumerLimit int    `json:"maxConsumerLimit"` // 最大開課人數上限
+	Count            int    `json:"count"`            // 目前參加人數
 	MeetingUrl       string `json:"meetingUrl"`       // 視訊平台連結
 }
 
@@ -53,7 +55,7 @@ type Appointment struct {
 	StartTimestamp int64  `json:"startTimestamp"` // 預約開始時間
 	EndTimestamp   int64  `json:"endTimestamp"`   // 預約結束時間
 	Note           string `json:"note"`           // 備註 (json format)
-	Status         int64  `json:"status"`         // -1:異常, 0:尚未開始,未發連結, 1:尚未開始,已發連結, 2:進行中, 3:已結束,未提供回饋, 4:已結束,已提供回饋, 5:已核銷
+	Status         int    `json:"status"`         // -1:異常, 0:尚未開始,未發連結, 1:尚未開始,已發連結, 2:進行中, 3:已結束,未提供回饋, 4:已結束,已提供回饋, 5:已核銷
 }
 
 type Feedback struct {
