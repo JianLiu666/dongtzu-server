@@ -1,7 +1,6 @@
 package zoomSDK
 
 import (
-	"dongtzu/config"
 	"dongtzu/constant"
 	"time"
 
@@ -10,8 +9,14 @@ import (
 )
 
 func GetMeetingUrl(startTime time.Time, minute int) (string, int) {
-	resp, err := client.CreateMeeting(zoom.CreateMeetingOptions{
-		HostID:    config.GetGlobalConfig().Zoom.UserID,
+	if !initialized {
+		return "", constant.Initialization_Notyet
+	}
+
+	handler := getHandler()
+
+	resp, err := handler.Client.CreateMeeting(zoom.CreateMeetingOptions{
+		HostID:    handler.UserId,
 		Topic:     "DongTzu Meeting",
 		Type:      zoom.MeetingTypeScheduled,
 		StartTime: &zoom.Time{Time: startTime},
