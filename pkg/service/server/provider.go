@@ -105,7 +105,7 @@ func UpdateProviderInfo() fiber.Handler {
 		}
 
 		// 3. if params status is 2 && update success -> github 串接
-		if body.Status == constant.ProviderStatusAuditing {
+		if body.Status == constant.Provider_Status_Auditing {
 			profile, _ := arangodb.GetProviderProfileByLineUserID(ctx, lineUserID)
 			err = githubSDK.CreateIssueForProvider(*profile)
 			if err != nil {

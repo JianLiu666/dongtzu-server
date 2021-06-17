@@ -1,5 +1,11 @@
 package model
 
+type ZoomAccount struct {
+	UserID    string `json:"userId"`
+	APIKey    string `json:"apiKey"`
+	APISecret string `json:"apiSecret"`
+}
+
 type Provider struct {
 	ID                 string `json:"_key,omitempty"`     // increment unique key
 	LineUserID         string `json:"lineUserId"`         // uniq Line userID (e.g. U123xxxxxxxxdef)
@@ -13,12 +19,12 @@ type Provider struct {
 	GmailAddr          string `json:"gamilAddr"`          // Gamil
 	ConfirmedGmailAddr string `json:"confirmedGmailAddr"` // 認證過的Gamil(Todo 發認證信)
 	GCalSync           bool   `json:"gCalSync"`           // Google Calendar 授權成功
+	InviteCode         string `json:"inviteCode"`         // 企業用戶，業務推廣碼
+	MemeberTerm        bool   `json:"memeberTerm"`        // 會員條款
+	PrivacyTerm        bool   `json:"privacyTerm"`        // 隱私全條款
+	Status             int    `json:"status"`             // 狀態 0: 暫存, 1: 確認送出, 2: 審核中, 3: 審核完成, 4: 審核不通過, 5: 例外處理
+	CreatedAt          int    `json:"createdAt"`          // 創建時間
 	// Todo 應該還有個google calendar 授權成功拿到的token
-	InviteCode  string `json:"inviteCode"`  // 企業用戶，業務推廣碼
-	MemeberTerm bool   `json:"memeberTerm"` // 會員條款
-	PrivacyTerm bool   `json:"privacyTerm"` // 隱私全條款
-	Status      int    `json:"status"`      // 狀態 0: 暫存, 1: 確認送出, 2: 審核中, 3: 審核完成, 4: 審核不通過, 5: 例外處理
-	CreatedAt   int    `json:"createdAt"`   // 創建時間
 }
 
 type Consumer struct {

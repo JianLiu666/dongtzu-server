@@ -1,19 +1,74 @@
 package zoomSDK
 
 import (
-	"dongtzu/config"
+	"context"
+	"dongtzu/constant"
+	"dongtzu/pkg/repository/arangodb"
+	"sync"
 
 	"github.com/himalayan-institute/zoom-lib-golang"
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
-var client *zoom.Client
+var once sync.Once
+var initialized bool
+var clients []*handler
+var clientIdx int
+var mu sync.Mutex
 
-func Init() {
-	defer logger.Debugf("[ZoomSDK] Initialized.")
+type handler struct {
+	UserId string
+	Client *zoom.Client
+}
 
-	client = zoom.NewClient(
-		config.GetGlobalConfig().Zoom.ApiKey,
-		config.GetGlobalConfig().Zoom.ApiSecret,
-	)
+func newHandler(userId, apiKey, apiSecret string) *handler {
+	return &handler{
+		UserId: userId,
+		Client: zoom.NewClient(apiKey, apiSecret),
+	}
+}
+
+func Init() int {
+	if initialized {
+		return constant.Module_Initialization_Already
+	}
+
+	statusCode := constant.Module_Initialization_Success
+	once.Do(func() {
+		zoomAccounts, code := arangodb.GetZoomAccounts(context.TODO())
+		if code != constant.ArangoDB_Success {
+			statusCode = constant.Module_Initialization_Failed
+			return
+		}
+
+		clients = []*handler{}
+		for _, account := range zoomAccounts {
+			clients = append(clients, newHandler(
+				account.UserID,
+				account.APIKey,
+				account.APISecret,
+			))
+		}
+
+		logger.Debugf("[ZoomSDK] Initialized.")
+	})
+
+	return statusCode
+}
+
+// round-robin
+func getHandler() *handler {
+	if len(clients) == 1 {
+		return clients[0]
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	clientIdx++
+	if clientIdx >= len(clients) {
+		clientIdx = 0
+	}
+
+	return clients[clientIdx]
 }

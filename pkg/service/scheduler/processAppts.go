@@ -17,17 +17,17 @@ func processReadyStartAppts() {
 	}
 
 	for _, s := range schedules {
-		appts, code := arangodb.GetApptsByScheduleIDAndStatus(context.TODO(), s.ID, constant.ApptStatus_Unsend_MeetingUrl)
+		appts, code := arangodb.GetApptsByScheduleIDAndStatus(context.TODO(), s.ID, constant.Appointment_Status_Unsend_MeetingUrl)
 		if code != constant.ArangoDB_Success {
 			continue
 		}
 
 		for _, appt := range appts {
 			lineSDK.PushMessage(appt.ConsumerLineID, s.MeetingUrl)
-			appt.Status = constant.ApptStatus_Unsend_FeedbackUrl
+			appt.Status = constant.Appointment_Status_Unsend_FeedbackUrl
 		}
 
-		_ = arangodb.UpdateApptsStatus(context.TODO(), appts, constant.ApptStatus_Unsend_FeedbackUrl)
+		_ = arangodb.UpdateApptsStatus(context.TODO(), appts, constant.Appointment_Status_Unsend_FeedbackUrl)
 	}
 }
 
@@ -40,16 +40,16 @@ func processReadyDismissAppts() {
 	}
 
 	for _, s := range schedules {
-		appts, code := arangodb.GetApptsByScheduleIDAndStatus(context.TODO(), s.ID, constant.ApptStatus_Unsend_FeedbackUrl)
+		appts, code := arangodb.GetApptsByScheduleIDAndStatus(context.TODO(), s.ID, constant.Appointment_Status_Unsend_FeedbackUrl)
 		if code != constant.ArangoDB_Success {
 			continue
 		}
 
 		for _, appt := range appts {
 			lineSDK.PushMessage(appt.ConsumerLineID, "TODO: 回饋連結")
-			appt.Status = constant.ApptStatus_Unverified
+			appt.Status = constant.Appointment_Status_Unverified
 		}
 
-		_ = arangodb.UpdateApptsStatus(context.TODO(), appts, constant.ApptStatus_Unverified)
+		_ = arangodb.UpdateApptsStatus(context.TODO(), appts, constant.Appointment_Status_Unverified)
 	}
 }
