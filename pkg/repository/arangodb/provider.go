@@ -91,11 +91,11 @@ function (Params) {
 
 	resCode, err := db.Transaction(ctx, aql, options)
 	if err != nil {
-		fmt.Errorf("CreateProviderProfile TX execution failure")
+		logger.Errorf("CreateProviderProfile TX execution failure")
 		return err
 	}
 
-	fmt.Println("CreateProviderProfile TX execution resCode is : %v", resCode)
+	logger.Debugf("CreateProviderProfile TX execution resCode is : %v\n", resCode)
 
 	return nil
 }
@@ -139,14 +139,14 @@ function (Params) {
 
 	resCode, err := db.Transaction(ctx, aql, options)
 	if err != nil {
-		fmt.Errorf("UpdateProviderByLineUserID TX execution failure")
+		logger.Errorf("UpdateProviderByLineUserID TX execution failure")
 		return err
 	}
 	if resCode == 2 {
 		return errors.New("Not found document")
 	}
 
-	fmt.Printf("UpdateProviderByLineUserID TX execution resCode is : %v", resCode)
+	logger.Debugf("UpdateProviderByLineUserID TX execution resCode is : %v", resCode)
 
 	return nil
 }
@@ -161,22 +161,24 @@ func formatCreateProviderMap(registerInfo model.RegisterProviderReq) (map[string
 		now = int(time.Now().Unix())
 	}
 	provider := model.Provider{
-		LineUserID:         registerInfo.LineUserID,
-		RealName:           registerInfo.RealName,
-		LineAtName:         registerInfo.LineAtName,
-		LineAtID:           registerInfo.LineAtID,
-		CountryCode:        "886",
-		LineID:             registerInfo.LineID,
-		PhoneNum:           registerInfo.PhoneNum,
-		ConfirmedPhoneNum:  registerInfo.PhoneNum,
-		GmailAddr:          registerInfo.GmailAddr,
-		ConfirmedGmailAddr: registerInfo.GmailAddr,
-		GCalSync:           false,
-		InviteCode:         registerInfo.InivteCode,
-		MemeberTerm:        false,
-		PrivacyTerm:        false,
-		Status:             registerInfo.Status,
-		CreatedAt:          now,
+		LineUserID:          registerInfo.LineUserID,
+		RealName:            registerInfo.RealName,
+		LineAtName:          registerInfo.LineAtName,
+		LineAtID:            registerInfo.LineAtID,
+		LineAtChannelSecret: "",
+		LineAtAccessToken:   "",
+		CountryCode:         "886",
+		LineID:              registerInfo.LineID,
+		PhoneNum:            registerInfo.PhoneNum,
+		ConfirmedPhoneNum:   registerInfo.PhoneNum,
+		GmailAddr:           registerInfo.GmailAddr,
+		ConfirmedGmailAddr:  registerInfo.GmailAddr,
+		GCalSync:            false,
+		InviteCode:          registerInfo.InivteCode,
+		MemeberTerm:         false,
+		PrivacyTerm:         false,
+		Status:              registerInfo.Status,
+		CreatedAt:           now,
 	}
 	j, _ := json.Marshal(provider)
 	_ = json.Unmarshal(j, &dataMap)
