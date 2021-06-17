@@ -6,7 +6,6 @@ import (
 	"dongtzu/pkg/model"
 	"dongtzu/pkg/repository/arangodb"
 	"dongtzu/pkg/repository/githubSDK"
-	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/valyala/fasthttp"
@@ -15,7 +14,6 @@ import (
 
 func GetProviderInfo() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		fmt.Println("heyy??")
 		lineUserID := c.Params("lineUserId")
 		if lineUserID == "" {
 			return c.Status(fasthttp.StatusNotFound).JSON(model.ErrRes{
