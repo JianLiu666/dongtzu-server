@@ -10,7 +10,7 @@ import (
 
 func GetMeetingUrl(startTime time.Time, minute int) (string, int) {
 	if !initialized {
-		return "", constant.Initialization_Notyet
+		return "", constant.Module_Initialization_Notyet
 	}
 
 	handler := getHandler()
@@ -32,8 +32,8 @@ func GetMeetingUrl(startTime time.Time, minute int) (string, int) {
 
 	if err != nil {
 		logger.Errorf("[ZoomSDK] create meeting url failed: %v", err)
-		return "", constant.Zoom_Driver_Failed
+		return "", constant.ZoomSDK_Driver_Failed
 	}
 
-	return resp.JoinURL, constant.Zoom_Success
+	return resp.JoinURL, constant.ZoomSDK_Success
 }

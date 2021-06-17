@@ -30,14 +30,14 @@ func newHandler(userId, apiKey, apiSecret string) *handler {
 
 func Init() int {
 	if initialized {
-		return constant.Initialization_Already
+		return constant.Module_Initialization_Already
 	}
 
-	statusCode := constant.Initialization_Success
+	statusCode := constant.Module_Initialization_Success
 	once.Do(func() {
 		zoomAccounts, code := arangodb.GetZoomAccounts(context.TODO())
 		if code != constant.ArangoDB_Success {
-			statusCode = constant.Initialization_Failed
+			statusCode = constant.Module_Initialization_Failed
 			return
 		}
 

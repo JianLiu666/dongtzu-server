@@ -16,7 +16,7 @@ func updateScheduleAndCreateMeetingUrl() {
 		minuteInteger := (s.EndTimestamp - s.StartTimestamp) / 60
 		meetingUrl, code := zoomSDK.GetMeetingUrl(scheduleTime, int(minuteInteger))
 
-		if code != constant.Zoom_Success {
+		if code != constant.ZoomSDK_Success {
 			continue
 		}
 		s.MeetingUrl = meetingUrl

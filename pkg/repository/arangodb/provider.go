@@ -157,7 +157,7 @@ function (Params) {
 func formatCreateProviderMap(registerInfo model.RegisterProviderReq) (map[string]interface{}, error) {
 	dataMap := map[string]interface{}{}
 	var now int
-	if registerInfo.Status == constant.ProviderStatusSaved {
+	if registerInfo.Status == constant.Provider_Status_Saved {
 		now = int(time.Now().Unix())
 	}
 	provider := model.Provider{
@@ -205,7 +205,7 @@ func formatUpdateProviderMap(providerInfo model.UpdateProviderInfoReq) (map[stri
 	delete(dataMap, "lineUserId")
 	delete(dataMap, "gCalSync")
 	delete(dataMap, "createdAt")
-	if providerInfo.Status != constant.ProviderStatusAuditing {
+	if providerInfo.Status != constant.Provider_Status_Auditing {
 		delete(dataMap, "memeberTerm")
 		delete(dataMap, "privacyTerm")
 	}
