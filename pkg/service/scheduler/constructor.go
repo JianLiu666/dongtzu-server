@@ -27,17 +27,17 @@ func Start() {
 
 func addJob(key, spec string, job func()) {
 	_, err := manager.AddFunc(spec, func() {
-		time.Now().UTC().Unix()
-		startAt := time.Now().UnixNano()
-		logger.Debugf("[Scheduler] %s now is working, and spec = %s", key, spec)
+		startAt := time.Now()
 		job()
-		spentTime := (time.Now().UnixNano() - startAt) / 1e6
-		logger.Debugf("[Scheduler] %s now has done, it spent %d (ms) and spec = %s", key, spentTime, spec)
+		endAt := time.Now()
+		spentTime := (endAt.UnixNano() - startAt.UnixNano()) / 1e6
+		// logger.Debugf("[Scheduler] %s now has done, it spent %d (ms) and spec = %s", key, spentTime, spec)
+		logger.Debugf("[Scheduler] %s is start at %v, end at %v, and spent %d ms.", key, startAt.Format("15:04:05.0000"), endAt.Format("15:04:05.0000"), spentTime)
 	})
 
 	if err != nil {
-		logger.Errorf("[Scheduler] add job failed: %v", err)
+		logger.Errorf("[Scheduler] Add job failed: %v", err)
 		return
 	}
-	logger.Debugf("[Scheduler] add job %v, and spec = %v", key, spec)
+	logger.Debugf("[Scheduler] Add job %v, and spec = %v", key, spec)
 }

@@ -51,14 +51,14 @@
   - [x] 單一帳號 (串測)
   - [x] 管理多個帳號 (Account Pool)
     - [x] 從 webhook subdomain 識別不同 provider 傳來的 request
-- [ ] Webhook Event
+- [x] Webhook Event
   - [ ] OnFollow
     - [ ] 至資料庫建立會員(目的是保留UserLineId)
   - [ ] OnUnfollow
     - [ ] 至資料庫軟刪除(只修改lineFollowingStatus)
-- [ ] Push Message
-  - [ ] 發送訊息至指定學員
-    - [ ] Text Message(串測)
+- [x] Push Message
+  - [x] 發送訊息至指定學員
+    - [x] Text Message(串測)
     - [ ] ImageMap Message
       - [ ] 串測 API
       - [ ] 設定跳轉連結(MeetingURL、FeedbackURL)

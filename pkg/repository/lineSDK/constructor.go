@@ -12,14 +12,15 @@ import (
 
 var once sync.Once
 var initialized bool
-var clientMap syncmap // map[string]*linebot.Client
 var reqChan chan *Request
+var clientMap syncmap                // map[string]*linebot.Client
+var providerMapping provider_mapping // map[string]string
 
 type client struct {
 	ChannelID     string
 	ChannelSecret string
 	AccessToken   string
-	Client        *linebot.Client
+	Bot           *linebot.Client
 }
 
 func newClient(channelID, channelSecret, accessToken string) *client {
@@ -32,7 +33,7 @@ func newClient(channelID, channelSecret, accessToken string) *client {
 		ChannelID:     channelID,
 		ChannelSecret: channelSecret,
 		AccessToken:   accessToken,
-		Client:        bot,
+		Bot:           bot,
 	}
 }
 
@@ -57,6 +58,7 @@ func Init() int {
 			)
 			if bot != nil {
 				clientMap.Store(provider.LineAtChannelID, bot)
+				providerMapping.Store(provider.ID, provider.LineAtChannelID)
 			}
 		}
 

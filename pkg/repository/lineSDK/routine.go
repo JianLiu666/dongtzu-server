@@ -8,7 +8,7 @@ import (
 )
 
 func startEventHandler() {
-	logger.Debugf("[LineSDK] start event handler.")
+	logger.Debugf("[LineSDK] Start event handler.")
 
 	for req := range reqChan {
 		events, code := req.parseEvents()

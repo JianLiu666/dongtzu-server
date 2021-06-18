@@ -16,13 +16,13 @@ func HandleRequest(req *Request) int {
 		return constant.Module_Initialization_Notyet
 	}
 
-	h, ok := clientMap.Load(req.ChannelID)
+	c, ok := clientMap.Load(req.ChannelID)
 	if !ok {
-		logger.Warnf("[LineSDK] can not found channel id: %v", req.ChannelID)
+		logger.Warnf("[LineSDK] Can not found line bot by channel id: %v", req.ChannelID)
 		return constant.LineSDK_ChannelID_NotFound
 	}
 
-	req.addChannelSecret(h.ChannelSecret)
+	req.addChannelSecret(c.ChannelSecret)
 	if !req.validateSignature() {
 		return constant.LineSDK_Request_Invalid
 	}

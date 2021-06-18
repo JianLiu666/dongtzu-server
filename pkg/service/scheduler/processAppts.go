@@ -23,7 +23,7 @@ func processReadyStartAppts() {
 		}
 
 		for _, appt := range appts {
-			lineSDK.PushMessage(appt.ConsumerLineID, s.MeetingUrl)
+			lineSDK.PushTextMessage(appt.ProviderID, appt.ConsumerLineID, s.MeetingUrl)
 			appt.Status = constant.Appointment_Status_Unsend_FeedbackUrl
 		}
 
@@ -46,7 +46,7 @@ func processReadyDismissAppts() {
 		}
 
 		for _, appt := range appts {
-			lineSDK.PushMessage(appt.ConsumerLineID, "TODO: 回饋連結")
+			lineSDK.PushTextMessage(appt.ProviderID, appt.ConsumerLineID, "TODO: 回饋連結")
 			appt.Status = constant.Appointment_Status_Unverified
 		}
 
