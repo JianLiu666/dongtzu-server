@@ -17,6 +17,38 @@ const (
 	CollectionProviders = "Providers"
 )
 
+func GetProviders(ctx context.Context) ([]*model.Provider, int) {
+	results := []*model.Provider{}
+
+	query := fmt.Sprintf(`
+		FOR d IN %s
+			FILTER d.lineAtChannelSecret != "" AND
+				d.lineAtAccessToken != ""
+			RETURN d`, CollectionProviders)
+	bindVars := map[string]interface{}{}
+	cursor, err := db.Query(ctx, query, bindVars)
+	defer closeCursor(cursor)
+	if err != nil {
+		logger.Errorf("[ArangoDB] GetProviders query failed: %v", err)
+		return []*model.Provider{}, constant.ArangoDB_Driver_Failed
+	}
+
+	for {
+		var doc *model.Provider
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			logger.Errorf("[ArangoDB] GetProviders cursor failed: %v", err)
+			return []*model.Provider{}, constant.ArangoDB_Driver_Failed
+		}
+
+		results = append(results, doc)
+	}
+
+	return results, constant.ArangoDB_Success
+}
+
 func GetProviderProfileByLineUserID(ctx context.Context, lineUserID string) (*model.Provider, error) {
 	var result model.Provider
 
@@ -100,8 +132,7 @@ function (Params) {
 	return nil
 }
 
-func UpdateProviderByLineUserID(ctx context.Context, lineUserID string,
-	providerInfo model.UpdateProviderInfoReq) error {
+func UpdateProviderByLineUserID(ctx context.Context, lineUserID string, providerInfo model.UpdateProviderInfoReq) error {
 	savedMap, err := formatUpdateProviderMap(providerInfo)
 	if err != nil {
 		return err
@@ -165,6 +196,7 @@ func formatCreateProviderMap(registerInfo model.RegisterProviderReq) (map[string
 		RealName:            registerInfo.RealName,
 		LineAtName:          registerInfo.LineAtName,
 		LineAtID:            registerInfo.LineAtID,
+		LineAtChannelID:     "",
 		LineAtChannelSecret: "",
 		LineAtAccessToken:   "",
 		CountryCode:         "886",
@@ -203,14 +235,17 @@ func formatUpdateProviderMap(providerInfo model.UpdateProviderInfoReq) (map[stri
 	j, _ := json.Marshal(provider)
 	_ = json.Unmarshal(j, &dataMap)
 	delete(dataMap, "_key")
-	delete(dataMap, "inviteCode")
 	delete(dataMap, "lineUserId")
+	delete(dataMap, "lineAtChannelId")
+	delete(dataMap, "lineAtChannelSecret")
+	delete(dataMap, "lineAtAccessToken")
 	delete(dataMap, "gCalSync")
-	delete(dataMap, "createdAt")
+	delete(dataMap, "inviteCode")
 	if providerInfo.Status != constant.Provider_Status_Auditing {
 		delete(dataMap, "memeberTerm")
 		delete(dataMap, "privacyTerm")
 	}
+	delete(dataMap, "createdAt")
 
 	return dataMap, nil
 }

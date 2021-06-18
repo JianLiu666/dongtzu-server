@@ -50,6 +50,7 @@ func Init() int {
 			))
 		}
 
+		initialized = true
 		logger.Debugf("[ZoomSDK] Initialized.")
 	})
 

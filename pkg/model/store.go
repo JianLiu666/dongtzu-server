@@ -12,6 +12,7 @@ type Provider struct {
 	RealName            string `json:"realName"`            // 中文姓名(真實)
 	LineAtName          string `json:"lineAtName"`          // 申請Line官方帳號名稱
 	LineAtID            string `json:"lineAtID"`            // 申請Line官方帳號ID(Todo 暫不實作)
+	LineAtChannelID     string `json:"lineAtChannelId"`     // 申請Line官方帳號 ChannelID
 	LineAtChannelSecret string `json:"lineAtChannelSecret"` // 申請Line官方帳號 ChannelSecret
 	LineAtAccessToken   string `json:"lineAtAccessToken"`   // 申請Line官方帳號 AccessToken
 	CountryCode         string `json:"countryCode"`         // 手機國碼(Todo 暫不實作)

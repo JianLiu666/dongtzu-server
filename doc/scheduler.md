@@ -47,10 +47,10 @@
 
 ### Line SDK
 
-- [ ] 啟動時從資料庫取得 Line Provider Accounts
-  - [ ] 單一帳號 (串測)
-  - [ ] 管理多個帳號 (Account Pool)
-    - [ ] 從 webhook subdomain 識別不同 provider 傳來的 request
+- [x] 啟動時從資料庫取得 Line Provider Accounts
+  - [x] 單一帳號 (串測)
+  - [x] 管理多個帳號 (Account Pool)
+    - [x] 從 webhook subdomain 識別不同 provider 傳來的 request
 - [ ] Webhook Event
   - [ ] OnFollow
     - [ ] 至資料庫建立會員(目的是保留UserLineId)
