@@ -5,14 +5,15 @@ import (
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
-func replyButtonTemplateMessageExample(channelID, replyToken string) {
+func replyFlexMessageExample(channelID, replyToken string) {
 	c, ok := clientMap.Load(channelID)
 	if !ok {
 		logger.Warnf("[LineSDK] can not found line bot by channel id: %v", channelID)
 		return
 	}
 
-	template, err := linebot.UnmarshalFlexMessageJSON([]byte(getFlexMeetingTemplate()))
+	// TODO: mock data
+	template, err := linebot.UnmarshalFlexMessageJSON([]byte(getMeetingFlexTemplate("https://www.google.com/")))
 	if err != nil {
 		logger.Errorf("[LineSDK] unmarshal JSON template failed: %v", err)
 		return
@@ -31,7 +32,8 @@ func replyFeedbackUrl(channelID, replyToken string) {
 		return
 	}
 
-	template, err := linebot.UnmarshalFlexMessageJSON([]byte(getFlexFeedbackTemplate()))
+	// TODO: mock data
+	template, err := linebot.UnmarshalFlexMessageJSON([]byte(getFeedbackFlexTemplate("https://www.google.com/")))
 	if err != nil {
 		logger.Errorf("[LineSDK] unmarshal JSON template failed: %v", err)
 		return

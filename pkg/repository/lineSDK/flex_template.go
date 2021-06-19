@@ -1,8 +1,9 @@
 package lineSDK
 
-func getFlexMeetingTemplate() string {
-	return `
-	{
+import "fmt"
+
+func getMeetingFlexTemplate(meetingUrl string) string {
+	jsonString := `{
 		"type": "bubble",
 		"size": "giga",
 		"hero": {
@@ -51,7 +52,7 @@ func getFlexMeetingTemplate() string {
 			  "action": {
 				"type": "uri",
 				"label": "開始上課",
-				"uri": "https://www.google.com/"
+				"uri": "%s"
 			  },
 			  "color": "#333333"
 			},
@@ -70,13 +71,13 @@ func getFlexMeetingTemplate() string {
 		  "flex": 0
 		},
 		"direction": "ltr"
-	  }
-	`
+	}`
+
+	return fmt.Sprintf(jsonString, meetingUrl)
 }
 
-func getFlexFeedbackTemplate() string {
-	return `
-	{
+func getFeedbackFlexTemplate(feedbackUrl string) string {
+	jsonString := `{
 		"type": "bubble",
 		"size": "giga",
 		"hero": {
@@ -92,6 +93,7 @@ func getFlexFeedbackTemplate() string {
 		  }
 		},
 		"direction": "ltr"
-	}
-	`
+	}`
+
+	return fmt.Sprintf(jsonString, feedbackUrl)
 }

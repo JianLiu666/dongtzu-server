@@ -67,7 +67,7 @@ func handleMessage(provider *model.Provider, event *linebot.Event) {
 		case "測試預約":
 
 		case "測試流程":
-			replyButtonTemplateMessageExample(provider.LineAtChannelID, event.ReplyToken)
+			replyFlexMessageExample(provider.LineAtChannelID, event.ReplyToken)
 		}
 	}
 }
