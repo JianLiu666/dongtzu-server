@@ -4,20 +4,54 @@ import (
 	"context"
 	"dongtzu/constant"
 	"dongtzu/pkg/model"
+	"encoding/json"
 
+	"github.com/arangodb/go-driver"
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
+const (
+	CollectionConsumers = "Consumers"
+)
+
 func CreateConsumer(ctx context.Context, doc *model.Consumer) int {
-	col, err := db.Collection(ctx, "Consumers")
+	jsonData, err := json.Marshal(doc)
 	if err != nil {
-		logger.Errorf("[ArangoDB][CreateConsumer] get collection failed: %v", err)
 		return constant.ArangoDB_Driver_Failed
 	}
 
-	_, err = col.CreateDocument(ctx, doc)
+	aql := `
+	function (Params) {
+		const db = require('@arangodb').db;
+		const consumerCol = db._collection("Consumers");
+		const savedObj = JSON.parse(Params[0]);
+
+		consumerDoc = consumerCol.firstExample({
+			lineUserId: savedObj.lineUserId, 
+			providerLineAtChannelId: savedObj.providerLineAtChannelId
+		});
+
+		if (consumerDoc && consumerDoc._key && consumerDoc._key.length > 0) {
+			consumerCol.update(consumerDoc._key, savedObj);
+
+		} else {
+			consumerCol.insert(savedObj);
+		}
+	
+		return 1;
+	}`
+
+	options := &driver.TransactionOptions{
+		MaxTransactionSize: 100000,
+		WriteCollections:   []string{CollectionConsumers},
+		ReadCollections:    []string{CollectionConsumers},
+		Params:             []interface{}{string(jsonData)},
+		WaitForSync:        false,
+	}
+
+	_, err = db.Transaction(ctx, aql, options)
 	if err != nil {
-		logger.Errorf("[ArangoDB][CreateConsumer] create document failed: %v", err)
+		logger.Errorf("[ArangoDB][CreateConsumer] transaction failed: %v", err)
 		return constant.ArangoDB_Driver_Failed
 	}
 
@@ -25,15 +59,31 @@ func CreateConsumer(ctx context.Context, doc *model.Consumer) int {
 }
 
 func UpdateConsumerByLineUserId(ctx context.Context, userId string, updates map[string]interface{}) int {
-	col, err := db.Collection(ctx, "Consumers")
-	if err != nil {
-		logger.Errorf("[ArangoDB][UpdateConsumer] get collection failed: %v", err)
-		return constant.ArangoDB_Driver_Failed
+	aql := `
+	function (Params) {
+		const db = require('@arangodb').db;
+		const consumerCol = db._collection("Consumers");
+		
+		consumerDoc = consumerCol.firstExample({lineUserId: Params[0]});
+		
+		if (consumerDoc && consumerDoc._key && consumerDoc._key.length > 0) {
+			consumerCol.update(consumerDoc._key, Params[1]);
+		}
+		
+		return 1;
+	}`
+
+	options := &driver.TransactionOptions{
+		MaxTransactionSize: 100000,
+		WriteCollections:   []string{CollectionConsumers},
+		ReadCollections:    []string{CollectionConsumers},
+		Params:             []interface{}{userId, updates},
+		WaitForSync:        false,
 	}
 
-	_, err = col.UpdateDocument(ctx, userId, updates)
+	_, err := db.Transaction(ctx, aql, options)
 	if err != nil {
-		logger.Errorf("[ArangoDB][UpdateConsumer] create document failed: %v", err)
+		logger.Errorf("[ArangoDB][CreateConsumer] transaction failed: %v", err)
 		return constant.ArangoDB_Driver_Failed
 	}
 

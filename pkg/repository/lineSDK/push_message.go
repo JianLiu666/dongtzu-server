@@ -6,15 +6,15 @@ import (
 )
 
 func PushTextMessage(providerID, consumerLineID, msg string) {
-	channelID, ok := providerMapping.Load(providerID)
+	provider, ok := providerMapping.Load(providerID)
 	if !ok {
 		logger.Warnf("[LineSDK] can not found channel id by provider id: %v", providerID)
 		return
 	}
 
-	c, ok := clientMap.Load(channelID)
+	c, ok := clientMap.Load(provider.LineAtChannelID)
 	if !ok {
-		logger.Warnf("[LineSDK] can not found line bot by channel id: %v", channelID)
+		logger.Warnf("[LineSDK] can not found line bot by channel id: %v", provider.LineAtChannelID)
 		return
 	}
 
