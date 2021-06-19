@@ -7,6 +7,7 @@
 package lineSDK
 
 import (
+	"dongtzu/pkg/model"
 	"sync"
 	"sync/atomic"
 	"unsafe"
@@ -70,7 +71,7 @@ type readOnlyProvider_mapping struct {
 
 // expunged is an arbitrary pointer that marks entries which have been deleted
 // from the dirty map.
-var expungedProvider_mapping = unsafe.Pointer(new(string))
+var expungedProvider_mapping = unsafe.Pointer(new(*model.Provider))
 
 // An entry is a slot in the map corresponding to a particular key.
 type entryProvider_mapping struct {
@@ -95,14 +96,14 @@ type entryProvider_mapping struct {
 	p unsafe.Pointer // *interface{}
 }
 
-func newEntryProvider_mapping(i string) *entryProvider_mapping {
+func newEntryProvider_mapping(i *model.Provider) *entryProvider_mapping {
 	return &entryProvider_mapping{p: unsafe.Pointer(&i)}
 }
 
 // Load returns the value stored in the map for a key, or nil if no
 // value is present.
 // The ok result indicates whether value was found in the map.
-func (m *provider_mapping) Load(key string) (value string, ok bool) {
+func (m *provider_mapping) Load(key string) (value *model.Provider, ok bool) {
 	read, _ := m.read.Load().(readOnlyProvider_mapping)
 	e, ok := read.m[key]
 	if !ok && read.amended {
@@ -127,16 +128,16 @@ func (m *provider_mapping) Load(key string) (value string, ok bool) {
 	return e.load()
 }
 
-func (e *entryProvider_mapping) load() (value string, ok bool) {
+func (e *entryProvider_mapping) load() (value *model.Provider, ok bool) {
 	p := atomic.LoadPointer(&e.p)
 	if p == nil || p == expungedProvider_mapping {
 		return value, false
 	}
-	return *(*string)(p), true
+	return *(**model.Provider)(p), true
 }
 
 // Store sets the value for a key.
-func (m *provider_mapping) Store(key, value string) {
+func (m *provider_mapping) Store(key string, value *model.Provider) {
 	read, _ := m.read.Load().(readOnlyProvider_mapping)
 	if e, ok := read.m[key]; ok && e.tryStore(&value) {
 		return
@@ -169,7 +170,7 @@ func (m *provider_mapping) Store(key, value string) {
 //
 // If the entry is expunged, tryStore returns false and leaves the entry
 // unchanged.
-func (e *entryProvider_mapping) tryStore(i *string) bool {
+func (e *entryProvider_mapping) tryStore(i **model.Provider) bool {
 	for {
 		p := atomic.LoadPointer(&e.p)
 		if p == expungedProvider_mapping {
@@ -192,14 +193,14 @@ func (e *entryProvider_mapping) unexpungeLocked() (wasExpunged bool) {
 // storeLocked unconditionally stores a value to the entry.
 //
 // The entry must be known not to be expunged.
-func (e *entryProvider_mapping) storeLocked(i *string) {
+func (e *entryProvider_mapping) storeLocked(i **model.Provider) {
 	atomic.StorePointer(&e.p, unsafe.Pointer(i))
 }
 
 // LoadOrStore returns the existing value for the key if present.
 // Otherwise, it stores and returns the given value.
 // The loaded result is true if the value was loaded, false if stored.
-func (m *provider_mapping) LoadOrStore(key, value string) (actual string, loaded bool) {
+func (m *provider_mapping) LoadOrStore(key string, value *model.Provider) (actual *model.Provider, loaded bool) {
 	// Avoid locking if it's a clean hit.
 	read, _ := m.read.Load().(readOnlyProvider_mapping)
 	if e, ok := read.m[key]; ok {
@@ -239,13 +240,13 @@ func (m *provider_mapping) LoadOrStore(key, value string) (actual string, loaded
 //
 // If the entry is expunged, tryLoadOrStore leaves the entry unchanged and
 // returns with ok==false.
-func (e *entryProvider_mapping) tryLoadOrStore(i string) (actual string, loaded, ok bool) {
+func (e *entryProvider_mapping) tryLoadOrStore(i *model.Provider) (actual *model.Provider, loaded, ok bool) {
 	p := atomic.LoadPointer(&e.p)
 	if p == expungedProvider_mapping {
 		return actual, false, false
 	}
 	if p != nil {
-		return *(*string)(p), true, true
+		return *(**model.Provider)(p), true, true
 	}
 
 	// Copy the interface after the first load to make this method more amenable
@@ -261,14 +262,14 @@ func (e *entryProvider_mapping) tryLoadOrStore(i string) (actual string, loaded,
 			return actual, false, false
 		}
 		if p != nil {
-			return *(*string)(p), true, true
+			return *(**model.Provider)(p), true, true
 		}
 	}
 }
 
 // LoadAndDelete deletes the value for a key, returning the previous value if any.
 // The loaded result reports whether the key was present.
-func (m *provider_mapping) LoadAndDelete(key string) (value string, loaded bool) {
+func (m *provider_mapping) LoadAndDelete(key string) (value *model.Provider, loaded bool) {
 	read, _ := m.read.Load().(readOnlyProvider_mapping)
 	e, ok := read.m[key]
 	if !ok && read.amended {
@@ -295,14 +296,14 @@ func (m *provider_mapping) Delete(key string) {
 	m.LoadAndDelete(key)
 }
 
-func (e *entryProvider_mapping) delete() (value string, ok bool) {
+func (e *entryProvider_mapping) delete() (value *model.Provider, ok bool) {
 	for {
 		p := atomic.LoadPointer(&e.p)
 		if p == nil || p == expungedProvider_mapping {
 			return value, false
 		}
 		if atomic.CompareAndSwapPointer(&e.p, p, nil) {
-			return *(*string)(p), true
+			return *(**model.Provider)(p), true
 		}
 	}
 }
@@ -317,7 +318,7 @@ func (e *entryProvider_mapping) delete() (value string, ok bool) {
 //
 // Range may be O(N) with the number of elements in the map even if f returns
 // false after a constant number of calls.
-func (m *provider_mapping) Range(f func(key, value string) bool) {
+func (m *provider_mapping) Range(f func(key string, value *model.Provider) bool) {
 	// We need to be able to iterate over all of the keys that were already
 	// present at the start of the call to Range.
 	// If read.amended is false, then read.m satisfies that property without

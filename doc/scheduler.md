@@ -52,10 +52,10 @@
   - [x] 管理多個帳號 (Account Pool)
     - [x] 從 webhook subdomain 識別不同 provider 傳來的 request
 - [x] Webhook Event
-  - [ ] OnFollow
-    - [ ] 至資料庫建立會員(目的是保留UserLineId)
-  - [ ] OnUnfollow
-    - [ ] 至資料庫軟刪除(只修改lineFollowingStatus)
+  - [x] OnFollow
+    - [x] 至資料庫建立會員(目的是保留UserLineId)
+  - [x] OnUnfollow
+    - [x] 至資料庫軟刪除(只修改lineFollowingStatus)
 - [x] Push Message
   - [x] 發送訊息至指定學員
     - [x] Text Message(串測)

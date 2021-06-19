@@ -31,9 +31,11 @@ type Provider struct {
 }
 
 type Consumer struct {
-	ID                  string `json:"_key,omitempty"`      // increment unique key
-	LineUserID          string `json:"lineUserId"`          // Line UserId
-	LineFollowingStatus int    `json:"lineFollowingStatus"` // Line following status
+	ID                      string `json:"_key,omitempty"`          // increment unique key
+	ProviderID              string `json:"providerId"`              // document reference key
+	LineUserID              string `json:"lineUserId"`              // Line UserId
+	LineFollowingStatus     int    `json:"lineFollowingStatus"`     // Line following status
+	ProviderLineAtChannelID string `json:"providerLineAtChannelId"` // Provider Line官方帳號 ChannelID
 }
 
 type ClassRoom struct {
