@@ -5,6 +5,7 @@ import (
 	"dongtzu/constant"
 	"dongtzu/pkg/model"
 	"dongtzu/pkg/repository/arangodb"
+	"time"
 
 	"github.com/line/line-bot-sdk-go/linebot"
 	"gitlab.geax.io/demeter/gologger/logger"
@@ -47,9 +48,38 @@ func handleEvents(provider *model.Provider, events []*linebot.Event) {
 			updateConsumer(event.Source.UserID)
 
 		case linebot.EventTypeMessage:
+			handleMessage(provider, event)
+
+		case linebot.EventTypePostback:
+			handlePostback(provider, event)
 
 		default:
 		}
+	}
+}
+
+func handleMessage(provider *model.Provider, event *linebot.Event) {
+	switch message := event.Message.(type) {
+	case *linebot.TextMessage:
+		switch message.Text {
+		case "測試購買":
+
+		case "測試預約":
+
+		case "測試流程":
+			replyButtonTemplateMessageExample(provider.LineAtChannelID, event.ReplyToken)
+		}
+	}
+}
+
+func handlePostback(provider *model.Provider, event *linebot.Event) {
+	data := event.Postback.Data
+	switch data {
+	case "GET_FEEDBACK_URL":
+		replyFeedbackUrl(provider.LineAtChannelID, event.ReplyToken)
+
+	default:
+		logger.Warnf("[LineSDK] postback data has unknown syntax: %v", data)
 	}
 }
 
@@ -59,6 +89,7 @@ func createConsumer(provider *model.Provider, userID string) {
 		ProviderID:              provider.ID,
 		ProviderLineAtChannelID: provider.LineAtChannelID,
 		LineFollowingStatus:     constant.Consumer_LineStatus_Following,
+		CreatedAt:               int(time.Now().Unix()),
 	}
 
 	_ = arangodb.CreateConsumer(context.TODO(), doc)

@@ -59,9 +59,9 @@
 - [x] Push Message
   - [x] 發送訊息至指定學員
     - [x] Text Message(串測)
-    - [ ] ImageMap Message
-      - [ ] 串測 API
-      - [ ] 設定跳轉連結(MeetingURL、FeedbackURL)
+    - [x] Template Message
+      - [x] 串測 API
+      - [x] 設定跳轉連結(MeetingURL、FeedbackURL)
 
 ### Scheduler
 
