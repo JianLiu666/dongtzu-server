@@ -59,9 +59,10 @@
 - [x] Push Message
   - [x] 發送訊息至指定學員
     - [x] Text Message(串測)
-    - [x] Template Message
+    - [x] Flex Template Message
       - [x] 串測 API
       - [x] 設定跳轉連結(MeetingURL、FeedbackURL)
+- [ ] 從資料庫載入 Flex Template 
 
 ### Scheduler
 
