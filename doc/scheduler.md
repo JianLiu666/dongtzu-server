@@ -59,29 +59,29 @@
 - [x] Push Message
   - [x] 發送訊息至指定學員
     - [x] Text Message(串測)
-    - [x] Flex Template Message
+    - [x] Flex Message
       - [x] 串測 API
       - [x] 設定跳轉連結(MeetingURL、FeedbackURL)
 - [ ] 從資料庫載入 Flex Template 
 
 ### Scheduler
 
-- [ ] 循環事件
-  - [ ] 替未申請 MeetingURL 的 Schedule 申請 MeetingURL
-    - [ ] 只處理即將到來的 Schedule (根據時間參數決定)
-    - [ ] 每 n 分鐘處理一次 (根據時間參數、會議建立速度決定)
-  - [ ] 會議開始前 n 分鐘發送 MeetingURL 至 consumers 的 line
-    - [ ] 每個 20, 50 分鐘時取得準備開始的 appointments 
-      - [ ] 取得 appointment 方式
-        - [ ] 從資料庫一次撈取所有符合條件的 appointments (解1)
+- [x] 循環事件
+  - [x] 替未申請 MeetingURL 的 Schedule 申請 MeetingURL
+    - [x] 只處理即將到來的 Schedule (根據時間參數決定)
+    - [x] 每隔 n 分鐘處理一次 (根據時間參數、會議建立速度決定)
+  - [x] 會議開始前 n 分鐘發送 MeetingURL 至 consumers 的 line
+    - [x] 每隔 n 分鐘時取得準備開始的 appointments 
+      - [x] 取得 appointment 方式
+        - [x] 從資料庫一次撈取所有符合條件的 appointments (解1)
         - [ ] 批次撈取所有符合條件的 appointments (解2, 降低單次資料量)
         - [ ] 預先 cache 即將到來的 appointments 到 timeWheel 上，直到開始前發送 (解3, 需要災難還原機與 appintment 資料被更新是否有影響)
-    - [ ] 發送訊息至對應的 consumers line
-      - [ ] Text Message (串測)
-      - [ ] ImageMap Message
-    - [ ] 將 appointment 的狀態改為已發送 MeetingURL (確保不會重複發送)
-    - [ ] 將已處理的 appointments 更新回資料庫
-  - [ ] 會議結束前 n 分鐘發送 FeedbackURL 至 consumers 的 line
+    - [x] 發送訊息至對應的 consumers line
+      - [x] Text Message (串測)
+      - [x] Flex Message
+    - [x] 將 appointment 的狀態改為已發送 MeetingURL (確保不會重複發送)
+    - [x] 將已處理的 appointments 更新回資料庫
+  - [ ] 會議結束前 n 分鐘發送 FeedbackURL 至 consumers 的 line (**該功能廢棄不做**)
     - [ ] 每個 20, 50 分鐘時取得準備結束的 appointments 
       - [ ] 取得 appointment 方式
         - [ ] 從資料庫一次撈取所有符合條件的 appointments (解1)

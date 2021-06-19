@@ -13,9 +13,8 @@ func Init() {
 	defer logger.Debugf("[Scheduler] Initialized.")
 
 	manager = cron.New()
-	addJob("updateScheduleAndCreateMeetingUrl", "*/1 * * * *", updateScheduleAndCreateMeetingUrl)
-	addJob("processReadyStartAppts", "25,55 * * * *", processReadyStartAppts)
-	addJob("processReadyDismissAppts", "25,55 * * * *", processReadyDismissAppts)
+	addJob("CreateMeetingUrl", "*/10 * * * *", createMeetingUrl)
+	addJob("SendMeetingUrl", "*/3 * * * *", sendMeetingUrl)
 }
 
 func Start() {

@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-func updateScheduleAndCreateMeetingUrl() {
-	schedules, _ := arangodb.GetWithoutMeetingUrlSchedules(context.TODO())
+func createMeetingUrl() {
+	schedules, _ := arangodb.GetUncreatedMeetingUrlSchedules(context.TODO())
 
 	for _, s := range schedules {
 		scheduleTime := time.Unix(s.StartTimestamp, 0)
