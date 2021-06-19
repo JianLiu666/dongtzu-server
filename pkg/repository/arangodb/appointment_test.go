@@ -2,38 +2,35 @@ package arangodb
 
 import (
 	"context"
+	"dongtzu/config"
 	"dongtzu/pkg/model"
 	"testing"
 
-	"github.com/arangodb/go-driver"
-	"github.com/arangodb/go-driver/http"
+	"github.com/spf13/viper"
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
-func TestCreateAppointment(t *testing.T) {
+func initConfig() {
 	logger.Init("debug")
 
-	conn, err := http.NewConnection(http.ConnectionConfig{
-		Endpoints: []string{"http://127.0.0.1:8529/"},
-	})
-	if err != nil {
-		logger.Errorf("[ArangoDB] Init http connection failed: %v", err)
-		return
+	viper.SetConfigFile("./../../../conf.d/env.yaml")
+	if err := viper.ReadInConfig(); err != nil {
+		logger.Errorf("ReadInConfig file failed: %v", err)
+	} else {
+		logger.Debugf("Using config file: %v", viper.ConfigFileUsed())
 	}
 
-	c, err := driver.NewClient(driver.ClientConfig{
-		Connection: conn,
-	})
+	c, err := config.NewFromViper()
 	if err != nil {
-		logger.Errorf("[ArangoDB] New arangodb client failed: %v", err)
-		return
+		logger.Errorf("Init config failed: %v", err)
 	}
+	config.SetConfig(c)
 
-	db, err = c.Database(context.TODO(), "_system")
-	if err != nil {
-		logger.Errorf("[ArangoDB] New arangodb client failed: %v", err)
-		return
-	}
+	Init()
+}
+
+func TestCreateAppointment(t *testing.T) {
+	initConfig()
 
 	appt := &model.Appointment{
 		ID:             "",
