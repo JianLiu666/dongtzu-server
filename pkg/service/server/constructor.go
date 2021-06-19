@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -19,19 +18,19 @@ func Init() {
 
 	server = fiber.New()
 	setMiddelWare(server)
-	server.Post("/line/webhook", adaptor.HTTPHandlerFunc(lineWebhook))
+	server.Post("/webhook/:channelId", lineWebhook())
 
 	dt := server.Group("/dt")
 	dt.Post("/appointment", appointment())
 
 	// Provider Registration
-	dt.Get("/providers/:lineUserId", GetProviderInfo())
-	dt.Post("/providers/register", RegisterProvider())
-	dt.Put("/providers/:lineUserId", UpdateProviderInfo())
+	dt.Get("/providers/:lineUserId", getProviderInfo())
+	dt.Post("/providers/register", registerProvider())
+	dt.Put("/providers/:lineUserId", updateProviderInfo())
 
 	// Provider Dashboard
-	dt.Get("/providers/:lineUserId/eventSchedule", GetProviderEventSchedule())
-	dt.Get("/providers/:lineUserId/incomeSummary", GetProviderIncomeSummary())
+	dt.Get("/providers/:lineUserId/eventSchedule", getProviderEventSchedule())
+	dt.Get("/providers/:lineUserId/incomeSummary", getProviderIncomeSummary())
 }
 
 func Start() {

@@ -19,6 +19,13 @@ const (
 	ZoomSDK_Success       // 操作成功
 	ZoomSDK_Driver_Failed // ZoomSDK Driver 操作失敗
 
+	// LineSDK
+
+	LineSDK_Success            // 操作成功
+	LineSDK_ChannelID_NotFound // 找不到對應 ChannelID 的 Provider
+	LineSDK_Request_Invalid    // Request 不合法
+	LineSDK_Event_ParseFaild   // 解析 linebot.Event 失敗
+
 	// Model.Appointment.Status
 
 	Appointment_Status_Cancelled          // 取消預約(軟刪除)

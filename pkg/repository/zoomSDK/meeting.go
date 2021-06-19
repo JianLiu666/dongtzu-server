@@ -1,6 +1,7 @@
 package zoomSDK
 
 import (
+	"dongtzu/config"
 	"dongtzu/constant"
 	"time"
 
@@ -20,7 +21,7 @@ func GetMeetingUrl(startTime time.Time, minute int) (string, int) {
 		Topic:     "DongTzu Meeting",
 		Type:      zoom.MeetingTypeScheduled,
 		StartTime: &zoom.Time{Time: startTime},
-		Duration:  minute,
+		Duration:  minute + config.GetGlobalConfig().Zoom.MeetingExtendedTime,
 		Timezone:  "Asia/Taipei",
 		Password:  "",
 		Agenda:    "Test meeeting api from zoom sdk.",

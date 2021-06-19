@@ -1,47 +1,26 @@
 package server
 
 import (
-	"context"
 	"dongtzu/constant"
-	"dongtzu/pkg/model"
-	"dongtzu/pkg/repository/arangodb"
 	"dongtzu/pkg/repository/lineSDK"
-	"net/http"
 
-	"github.com/line/line-bot-sdk-go/linebot"
+	"github.com/gofiber/fiber/v2"
+	"gitlab.geax.io/demeter/gologger/logger"
 )
 
-func lineWebhook(w http.ResponseWriter, r *http.Request) {
-	events := lineSDK.ParseRequest(w, r)
+func lineWebhook() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		channelID := c.Params("channelId")
 
-	for _, event := range events {
-		switch event.Type {
-		case linebot.EventTypeFollow:
-			createConsumer(event.Source.UserID)
-
-		case linebot.EventTypeUnfollow:
-			updateConsumer(event.Source.UserID)
-
-		case linebot.EventTypeMessage:
-
-		default:
+		code := lineSDK.HandleRequest(lineSDK.NewRequest(
+			channelID,
+			c.Get("X-Line-Signature"),
+			c.Request().Body(),
+		))
+		if code != constant.LineSDK_Success {
+			logger.Warnf("[Server] handle line request failed: %v", code)
 		}
+
+		return c.JSON(fiber.Map{"code": 200})
 	}
-}
-
-func createConsumer(userId string) {
-	doc := &model.Consumer{
-		LineUserID:          userId,
-		LineFollowingStatus: constant.Consumer_LineStatus_Following,
-	}
-
-	_ = arangodb.CreateConsumer(context.TODO(), doc)
-}
-
-func updateConsumer(userId string) {
-	// updates := map[string]interface{}{
-	// 	"lineFollowingStatus": constant.Consumer_LineStatus_Unfollowing,
-	// }
-
-	// _ = arangodb.UpdateConsumerByLineUserId(context.TODO(), userId, updates)
 }

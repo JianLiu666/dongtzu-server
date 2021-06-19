@@ -12,7 +12,7 @@ import (
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
-func GetProviderInfo() fiber.Handler {
+func getProviderInfo() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		lineUserID := c.Params("lineUserId")
 		if lineUserID == "" {
@@ -40,7 +40,7 @@ func GetProviderInfo() fiber.Handler {
 	}
 }
 
-func RegisterProvider() fiber.Handler {
+func registerProvider() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// 1. parsing post body
 		var body model.RegisterProviderReq
@@ -73,7 +73,7 @@ func RegisterProvider() fiber.Handler {
 // - 1. 之後再實作手機修改簡訊驗證邏輯
 // - 2. 之後再實作gmail修改email + calendar同步邏輯
 // 目前只實做完全信任前端覆蓋資料的邏輯
-func UpdateProviderInfo() fiber.Handler {
+func updateProviderInfo() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		lineUserID := c.Params("lineUserId")
 		if lineUserID == "" {
@@ -120,7 +120,7 @@ func UpdateProviderInfo() fiber.Handler {
 }
 
 // 拿Provider班表
-func GetProviderEventSchedule() fiber.Handler {
+func getProviderEventSchedule() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// 1. get provider by lineUserId
 		// 2. get schedule by providerId
@@ -131,7 +131,7 @@ func GetProviderEventSchedule() fiber.Handler {
 }
 
 // 拿Provider收入簡介
-func GetProviderIncomeSummary() fiber.Handler {
+func getProviderIncomeSummary() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		return nil
 	}
