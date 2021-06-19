@@ -118,3 +118,21 @@ func UpdateProviderInfo() fiber.Handler {
 		})
 	}
 }
+
+// 拿Provider班表
+func GetProviderEventSchedule() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// 1. get provider by lineUserId
+		// 2. get schedule by providerId
+		// 3. get appointment by providerId
+		// 4. return schedule and appointments
+		return nil
+	}
+}
+
+// 拿Provider收入簡介
+func GetProviderIncomeSummary() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		return nil
+	}
+}

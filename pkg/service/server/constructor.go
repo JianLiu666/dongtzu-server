@@ -28,6 +28,10 @@ func Init() {
 	dt.Get("/providers/:lineUserId", GetProviderInfo())
 	dt.Post("/providers/register", RegisterProvider())
 	dt.Put("/providers/:lineUserId", UpdateProviderInfo())
+
+	// Provider Dashboard
+	dt.Get("/providers/:lineUserId/eventSchedule", GetProviderEventSchedule())
+	dt.Get("/providers/:lineUserId/incomeSummary", GetProviderIncomeSummary())
 }
 
 func Start() {
