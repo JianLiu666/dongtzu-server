@@ -89,7 +89,7 @@ func getFeedbackFlexTemplate(feedbackUrl string) string {
 		  "action": {
 			"type": "uri",
 			"label": "action",
-			"uri": "https://www.google.com/"
+			"uri": "%v"
 		  }
 		},
 		"direction": "ltr"
