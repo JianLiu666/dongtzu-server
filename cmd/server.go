@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var subscriberCmd = &cobra.Command{
+var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "enjoy for it.",
 	Long:  `No more description.`,
@@ -21,7 +21,7 @@ var subscriberCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(subscriberCmd)
+	rootCmd.AddCommand(serverCmd)
 }
 
 func RunServerCmd(cmd *cobra.Command, args []string) error {

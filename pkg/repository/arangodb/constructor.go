@@ -13,6 +13,14 @@ import (
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
+const (
+	collectionAppointments = "Appointments"
+	collectionConsumers    = "Consumers"
+	collectionProviders    = "Providers"
+	collectionSchedules    = "Schedules"
+	collectionZoomAccounts = "ZoomAccounts"
+)
+
 var once sync.Once
 var db driver.Database
 

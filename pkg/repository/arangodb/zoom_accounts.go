@@ -10,10 +10,6 @@ import (
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
-const (
-	CollectionZoomAccounts = "ZoomAccounts"
-)
-
 func GetZoomAccounts(ctx context.Context) ([]*model.ZoomAccount, int) {
 	results := []*model.ZoomAccount{}
 
@@ -22,7 +18,7 @@ func GetZoomAccounts(ctx context.Context) ([]*model.ZoomAccount, int) {
 			FILTER d.userId != "" AND
 				d.apiKet != "" AND
 				d.apiSecret != ""
-			RETURN d`, CollectionZoomAccounts)
+			RETURN d`, collectionZoomAccounts)
 	bindVars := map[string]interface{}{}
 	cursor, err := db.Query(ctx, query, bindVars)
 	defer closeCursor(cursor)

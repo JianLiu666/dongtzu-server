@@ -13,10 +13,6 @@ import (
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
-const (
-	CollectionProviders = "Providers"
-)
-
 func GetProviders(ctx context.Context) ([]*model.Provider, int) {
 	results := []*model.Provider{}
 
@@ -24,7 +20,7 @@ func GetProviders(ctx context.Context) ([]*model.Provider, int) {
 		FOR d IN %s
 			FILTER d.lineAtChannelSecret != "" AND
 				d.lineAtAccessToken != ""
-			RETURN d`, CollectionProviders)
+			RETURN d`, collectionProviders)
 	bindVars := map[string]interface{}{}
 	cursor, err := db.Query(ctx, query, bindVars)
 	defer closeCursor(cursor)
@@ -55,7 +51,7 @@ func GetProviderProfileByLineUserID(ctx context.Context, lineUserID string) (*mo
 	query := fmt.Sprintf(`
 		FOR p IN %s 
 			FILTER p.lineUserId == @lineUserId
-		RETURN p`, CollectionProviders)
+		RETURN p`, collectionProviders)
 	bindVars := map[string]interface{}{
 		"lineUserId": lineUserID,
 	}
@@ -115,8 +111,8 @@ function (Params) {
 `
 	options := &driver.TransactionOptions{
 		MaxTransactionSize: 100000,
-		WriteCollections:   []string{CollectionProviders},
-		ReadCollections:    []string{CollectionProviders},
+		WriteCollections:   []string{collectionProviders},
+		ReadCollections:    []string{collectionProviders},
 		Params:             []interface{}{savedMap},
 		WaitForSync:        false,
 	}
@@ -162,8 +158,8 @@ function (Params) {
 `
 	options := &driver.TransactionOptions{
 		MaxTransactionSize: 100000,
-		WriteCollections:   []string{CollectionProviders},
-		ReadCollections:    []string{CollectionProviders},
+		WriteCollections:   []string{collectionProviders},
+		ReadCollections:    []string{collectionProviders},
 		Params:             []interface{}{lineUserID, savedMap},
 		WaitForSync:        false,
 	}
