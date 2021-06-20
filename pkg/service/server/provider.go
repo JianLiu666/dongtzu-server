@@ -133,6 +133,11 @@ func getProviderEventSchedule() fiber.Handler {
 // 拿Provider收入簡介
 func getProviderIncomeSummary() fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		// 1. get provider by lineUserId
+		// 2. get payments status is done
+		// 3. get monthly receipt
+		// 4. get current month appointments
+		// 5. format the summary data
 		return nil
 	}
 }

@@ -27,6 +27,7 @@ type Provider struct {
 	PrivacyTerm         bool   `json:"privacyTerm"`         // 隱私全條款
 	Status              int    `json:"status"`              // 狀態 0: 暫存, 1: 確認送出, 2: 審核中, 3: 審核完成, 4: 審核不通過, 5: 例外處理
 	CreatedAt           int    `json:"createdAt"`           // 創建時間
+	Blocked             bool   `json:"bolcked"`             // Todo 停權blocked, 停權處理流程
 	// Todo 應該還有個google calendar 授權成功拿到的token
 }
 
@@ -48,6 +49,7 @@ type ClassRoom struct {
 
 type Schedule struct {
 	ID               string `json:"_key,omitempty"`   // increment unique key
+	ClassRoomId      string `json:"classRoomId"`      // Class room key
 	ProviderID       string `json:"providerId"`       // document reference key
 	StartTimestamp   int64  `json:"startTimestamp"`   // 預約開始時間
 	EndTimestamp     int64  `json:"endTimestamp"`     // 預約結束時間
@@ -58,16 +60,23 @@ type Schedule struct {
 }
 
 type Appointment struct {
-	ID             string `json:"_key,omitempty"` // increment unique key
-	ProviderID     string `json:"providerId"`     // document reference key
-	ScheduleID     string `json:"scheduleId"`     // document reference key
-	ConsumerID     string `json:"consumerId"`     // document reference key
-	FeedbackID     string `json:"feedbackId"`     // document reference key
-	ConsumerLineID string `json:"consumerLineId"` // Consumer Line UserId
-	StartTimestamp int64  `json:"startTimestamp"` // 預約開始時間
-	EndTimestamp   int64  `json:"endTimestamp"`   // 預約結束時間
-	Note           string `json:"note"`           // 備註 (json format)
-	Status         int    `json:"status"`         // -1:異常, 0:尚未開始,未發連結, 1:尚未開始,已發連結, 2:進行中, 3:已結束,未提供回饋, 4:已結束,已提供回饋, 5:已核銷
+	ID               string `json:"_key,omitempty"`   // increment unique key
+	ProviderID       string `json:"providerId"`       // document reference key
+	ScheduleID       string `json:"scheduleId"`       // document reference key
+	ConsumerID       string `json:"consumerId"`       // document reference key
+	FeedbackID       string `json:"feedbackId"`       // document reference key
+	ConsumerLineID   string `json:"consumerLineId"`   // Consumer Line UserId
+	PaymentMethodID  string `json:"paymentMethodId"`  // 出款透過的金流平台
+	MonthReceiptID   string `json:"monthReceiptId"`   // 月出款報表
+	PaymentMethodFee int32  `json:"paymentMethodFee"` // 出款結算透過的金流所扣的錢
+	StartTimestamp   int64  `json:"startTimestamp"`   // 預約開始時間
+	EndTimestamp     int64  `json:"endTimestamp"`     // 預約結束時間
+	Note             string `json:"note"`             // 備註 (json format)
+	Status           int    `json:"status"`           // -1:異常, 0:尚未開始,未發連結, 1:尚未開始,已發連結, 2:進行中, 3:已結束,未提供回饋, 4:已結束,已提供回饋, 5:已核銷
+	CreatedAt        int64  `json:"createdAt"`
+	UpdatedAt        int64  `json:"updatedAt"`
+	DeletedAt        int64  `json:"deletedAt"`
+	RescheduledAt    int64  `json:"rescheduledAt"` // Todo 改期，還漏一些相關要同步狀態的column設計
 }
 
 type Feedback struct {
@@ -76,4 +85,73 @@ type Feedback struct {
 	AppointmentID string `json:"appointmentId"`  // document reference key
 	Title         string `json:"title"`          // 回饋標題
 	Content       string `json:"content"`        // 回饋內容
+}
+
+type ServiceProduct struct {
+	ID              string `json:"_key,omitempty"`  // increment unique key
+	ProviderID      string `json:"providerId"`      // document reference key
+	CountPerPack    string `json:"pack"`            // 一包多少堂
+	Price           string `json:"price"`           // 一堂多少價格
+	ExpiredDuration int32  `json:"expiredDuration"` // 多久過期
+	CreatedAt       int64  `json:"createdAt"`       //
+	DeletedAt       int64  `json:"deletedAt"`       // soft delete (讓order history可以reference)
+}
+
+// 第三方金流費率
+type PaymentMethod struct {
+	ID              string `json:"_key,omitempty"`  // increment unique key
+	PaymentType     string `json:"paymentType"`     // 付款方式, 刷卡、超商、ATM轉帳...
+	ServicePlatform string `json:"servicePlatform"` // 金流平台, default 藍新
+	// Todo 看藍新、我們所要支援的種類還有相應的費率
+}
+
+type Order struct {
+	ID               string `json:"_key,omitempty"`   // increment unique key
+	ConsumerID       string `json:"consumerId"`       // document reference key 誰買的
+	ProviderID       string `json:"providerId"`       // document reference key 買誰提供的服務
+	ServiceProductID string `json:"serviceProductId"` // document reference key 買哪款服務產品
+	PaymentMethodID  string `json:"paymentMethodId"`  // document reference key 選擇的結帳方式
+	Amount           string `json:"amount"`           // 購買數量
+	Status           int    `json:"status"`           // 狀態, 0初始、1付款中、2已付款、3取消
+	CreatedAt        int64  `json:"createdAt"`        // 訂單創建時間
+	UpdatedAt        int64  `json:"updatedAt"`        // 更新時間
+	PaidAt           int64  `json:"paidAt"`           // 付款日期
+}
+
+type Payment struct {
+	ID              string `json:"_key,omitempty"`  // increment unique key
+	OrderID         string `json:"orderId"`         // document reference key
+	ConsumerID      string `json:"consumerId"`      // document reference key
+	PaymentMethodID string `json:"paymentMethodId"` // document reference key
+	PaidPrice       int32  `json:"paidPrice"`       // 付款金額
+	PlatformFee     int32  `json:"platformFee"`     // 我們平台所抽的金額
+	PaymentFee      int32  `json:"paymentFee"`      // 金流服務抽成
+	AgentFee        int32  `json:"agentFee"`        // Todo 合作抽成(與廠商合作的分潤)
+	AdFee           int32  `json:"adFee"`           // Todo 業務推廣抽成
+	TaxFee          int32  `json:"taxFee"`          // Todo 勞務報酬報稅
+	NetAmount       int32  `json:"netAmount"`       // 可被發放的金額
+	Status          int    `json:"status"`          // 狀態, 是否成功付款
+	RawParams       string `json:"rawParams"`       // 原始參數
+	CreatedAt       int64  `json:"createdAt"`       // 訂單創建時間
+	UpdatedAt       int64  `json:"updatedAt"`       // 更新時間
+}
+
+type MonthReceipt struct {
+	ID                string `json:"_key,omitempty"`         // increment unique key
+	ProviderID        string `json:"providerId"`             // document reference key
+	RawTotalIncome    int32  `json:"rawTotalIncome"`         // 原始收入總額
+	RemittedAmount    int32  `json:"remittedAmount"`         // 退款金額
+	PlatformRate      int32  `json:"platformRate"`           // 抽成比例
+	PlatformFee       int32  `json:"platformFee"`            // 抽成總額
+	MarketingFee      int32  `json:"marketingFee"`           // Todo 相關行銷分潤總和
+	IncomeGatewayFee  int32  `json:"totalIncomeGatewayFee"`  // 第三方金流收款時所抽取之總額
+	OutcomeGatewayFee int32  `json:"totalOutcomeGatewayFee"` // 第三方金流放款時所抽取之總額
+	TaxFee            int32  `json:"taxFee"`                 // Todo 扣掉相關國家稅務
+	NetIncome         int32  `json:"netIncome"`              // 老師到帳淨收入
+	Notes             string `json:"notes"`                  // 相關備註
+	Paid              bool   `json:"paid"`                   // 是否放完款項
+	ClearingStartedAt int64  `json:"clearingStartedAt"`      // 結算起始時間
+	CreatedAt         int64  `json:"createdAt"`              // 創建時間
+	UpdatedAt         int64  `json:"updatedAt"`              // 更新時間
+	PaidAt            int64  `json:"paidAt"`                 // 放款時間
 }
