@@ -5,7 +5,7 @@ import (
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
-func PushTextMessage(providerID, consumerLineID, msg string) {
+func SendMeetingUrl(providerID, consumerLineID, meetingUrl string) {
 	provider, ok := providerMapping.Load(providerID)
 	if !ok {
 		logger.Warnf("[LineSDK] can not found channel id by provider id: %v", providerID)
@@ -18,8 +18,14 @@ func PushTextMessage(providerID, consumerLineID, msg string) {
 		return
 	}
 
-	_, err := c.Bot.PushMessage(consumerLineID, linebot.NewTextMessage(msg)).Do()
+	template, err := linebot.UnmarshalFlexMessageJSON([]byte(getMeetingFlexTemplate(meetingUrl)))
 	if err != nil {
-		logger.Errorf("[LineSDK] push text message failed: %v", err)
+		logger.Errorf("[LineSDK] unmarshal JSON template failed: %v", err)
+		return
+	}
+
+	_, err = c.Bot.PushMessage(consumerLineID, linebot.NewFlexMessage("template alt text", template)).Do()
+	if err != nil {
+		logger.Errorf("[LineSDK] push buttons template message failed: %v", err)
 	}
 }

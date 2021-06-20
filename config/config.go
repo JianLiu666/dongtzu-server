@@ -12,11 +12,10 @@ var (
 )
 
 type config struct {
-	Fiber    FiberConfig   `yaml:"fiber,omitempty"`
-	ArangoDB ArangoConfig  `yaml:"arangoDB,omitempty"`
-	LineBot  LineBotConfig `yaml:"linebot,omitempty"`
-	Zoom     ZoomConfig    `yaml:"zoom,omitempty"`
-	Github   GithubConfig  `yaml:"github,omitempty"`
+	ArangoDB ArangoConfig `yaml:"arangoDB"`
+	Fiber    FiberConfig  `yaml:"fiber"`
+	Github   GithubConfig `yaml:"github"`
+	Zoom     ZoomConfig   `yaml:"zoom"`
 }
 
 func NewFromViper() (*config, error) {
@@ -36,4 +35,26 @@ func SetConfig(c *config) {
 
 func GetGlobalConfig() *config {
 	return globalConfig
+}
+
+type ArangoConfig struct {
+	Addr       string `yaml:"addr"`
+	DBName     string `yaml:"dbName"`
+	Username   string `yaml:"username"`
+	Password   string `yaml:"password"`
+	ConnLimit  int    `yaml:"connLimit"`
+	RetryCount int    `yaml:"retryCount"`
+}
+
+type FiberConfig struct {
+	Port string `yaml:"port"`
+}
+
+type GithubConfig struct {
+	RepoURL  string `yaml:"repoURL"`
+	APIToken string `yaml:"apiToken"`
+}
+
+type ZoomConfig struct {
+	MeetingExtendedTime int `yaml:"meetingExtendedTime"`
 }

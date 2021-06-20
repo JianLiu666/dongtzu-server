@@ -10,10 +10,6 @@ import (
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
-const (
-	CollectionConsumers = "Consumers"
-)
-
 func CreateConsumer(ctx context.Context, doc *model.Consumer) int {
 	jsonData, err := json.Marshal(doc)
 	if err != nil {
@@ -43,8 +39,8 @@ func CreateConsumer(ctx context.Context, doc *model.Consumer) int {
 
 	options := &driver.TransactionOptions{
 		MaxTransactionSize: 100000,
-		WriteCollections:   []string{CollectionConsumers},
-		ReadCollections:    []string{CollectionConsumers},
+		WriteCollections:   []string{collectionConsumers},
+		ReadCollections:    []string{collectionConsumers},
 		Params:             []interface{}{string(jsonData)},
 		WaitForSync:        false,
 	}
@@ -75,8 +71,8 @@ func UpdateConsumerByLineUserId(ctx context.Context, userId string, updates map[
 
 	options := &driver.TransactionOptions{
 		MaxTransactionSize: 100000,
-		WriteCollections:   []string{CollectionConsumers},
-		ReadCollections:    []string{CollectionConsumers},
+		WriteCollections:   []string{collectionConsumers},
+		ReadCollections:    []string{collectionConsumers},
 		Params:             []interface{}{userId, updates},
 		WaitForSync:        false,
 	}

@@ -9,10 +9,6 @@ import (
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
-const (
-	CollectionAppointments = "Appointments"
-)
-
 // 建立預約
 //
 // 1. 檢查 schedule 預約人數是否已經達到上限

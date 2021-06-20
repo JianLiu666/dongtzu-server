@@ -13,9 +13,8 @@ func Init() {
 	defer logger.Debugf("[Scheduler] Initialized.")
 
 	manager = cron.New()
-	addJob("updateScheduleAndCreateMeetingUrl", "*/1 * * * *", updateScheduleAndCreateMeetingUrl)
-	addJob("processReadyStartAppts", "25,55 * * * *", processReadyStartAppts)
-	addJob("processReadyDismissAppts", "25,55 * * * *", processReadyDismissAppts)
+	addJob("CreateMeetingUrl", "*/10 * * * *", createMeetingUrl)
+	addJob("SendMeetingUrl", "*/3 * * * *", sendMeetingUrl)
 }
 
 func Start() {
@@ -31,7 +30,6 @@ func addJob(key, spec string, job func()) {
 		job()
 		endAt := time.Now()
 		spentTime := (endAt.UnixNano() - startAt.UnixNano()) / 1e6
-		// logger.Debugf("[Scheduler] %s now has done, it spent %d (ms) and spec = %s", key, spentTime, spec)
 		logger.Debugf("[Scheduler] %s is start at %v, end at %v, and spent %d ms.", key, startAt.Format("15:04:05.0000"), endAt.Format("15:04:05.0000"), spentTime)
 	})
 
