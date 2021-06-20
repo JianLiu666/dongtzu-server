@@ -43,3 +43,8 @@
 
 - [ ] AranogoDB Seed
 - [ ] 單元測試環境
+
+### 藍新金流測試帳密
+cwww.newebay.com
+- ts0542648@gmail.com
+- P@ssw0rd
