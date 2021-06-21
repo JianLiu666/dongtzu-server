@@ -27,5 +27,5 @@
 
 ## 測試流程
 
-- [ ] 發送文字訊息，由 Webhook 轉拋至 Server
-- [ ] 主動發送一筆 FlexMessage 至對應的 UserId
+- [x] 發送文字訊息，由 Webhook 轉拋至 Server
+- [x] 主動發送一筆 FlexMessage 至對應的 UserId

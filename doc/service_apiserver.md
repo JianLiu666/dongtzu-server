@@ -3,10 +3,6 @@
 - [APIServer](#apiserver)
   - [Summary](#summary)
   - [TODOs](#todos)
-    - [NewebPay SDK](#newebpay-sdk)
-    - [APIServer](#apiserver-1)
-    - [Migration](#migration)
-    - [藍新金流測試帳密](#藍新金流測試帳密)
 
 <br>
 
@@ -20,12 +16,7 @@
 
 ## TODOs
 
-### NewebPay SDK
-
-- [ ] 串測(待定)
-
-### APIServer
-
+- [ ] [API] 取得老師的授課方案(ServiceProduct)
 - [ ] [API] 購買課程(待定)
 - [ ] [API] 預約課程
   - [ ] API Request Schema
@@ -39,14 +30,3 @@
       - [ ] 4. 更新 schedule count(當前人數)
     - [ ] 傳送 appointment 到 scheduler cache (對應 [Scheduler 處理 appointments 的解 3](./scheduler.md#scheduler-1))
     - [ ] Response
-
-### Migration
-
-- [ ] AranogoDB Seed
-- [ ] 單元測試環境
-
-### 藍新金流測試帳密
-
-cwww.newebay.com
-- ts0542648@gmail.com
-- P@ssw0rd
