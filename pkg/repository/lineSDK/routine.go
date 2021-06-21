@@ -45,7 +45,7 @@ func handleEvents(provider *model.Provider, events []*linebot.Event) {
 			createConsumer(provider, event.Source.UserID)
 
 		case linebot.EventTypeUnfollow:
-			updateConsumer(event.Source.UserID)
+			setConsumerToUnfollowing(event.Source.UserID)
 
 		case linebot.EventTypeMessage:
 			handleMessage(provider, event)
@@ -64,6 +64,7 @@ func handleMessage(provider *model.Provider, event *linebot.Event) {
 		switch message.Text {
 		case "測試購買":
 			createConsumer(provider, event.Source.UserID)
+			buyDefaultProductExample(provider, event.Source.UserID, event.ReplyToken)
 
 		case "測試預約":
 			createConsumer(provider, event.Source.UserID)
@@ -97,10 +98,53 @@ func createConsumer(provider *model.Provider, userID string) {
 	_ = arangodb.CreateConsumer(context.TODO(), doc)
 }
 
-func updateConsumer(userId string) {
+func setConsumerToUnfollowing(userID string) {
 	updates := map[string]interface{}{
 		"lineFollowingStatus": constant.Consumer_LineStatus_Unfollowing,
 	}
 
-	_ = arangodb.UpdateConsumerByLineUserId(context.TODO(), userId, updates)
+	_ = arangodb.UpdateConsumerByLineUserId(context.TODO(), userID, updates)
+}
+
+func buyDefaultProductExample(provider *model.Provider, userID, replyToken string) {
+	products, code := arangodb.GetServiceProducts(context.TODO(), provider.ID)
+	if code != constant.ArangoDB_Success {
+		return
+	}
+	if len(products) == 0 {
+		return
+	}
+	consumer, code := arangodb.GetConsumerByLineUserID(context.TODO(), userID)
+	if code != constant.ArangoDB_Success {
+		return
+	}
+
+	order, code := arangodb.CreateOrder(context.TODO(), consumer.ID, provider.ID, products[0].ID, 1)
+	if code != constant.ArangoDB_Success {
+		return
+	}
+
+	payment := &model.Payment{
+		OrderID:         order.ID,
+		ConsumerID:      consumer.ID,
+		PaymentMethodID: "501713", // TODO: Mock
+		PaidPrice:       int64(products[0].Price),
+		PlatformFee:     0,
+		PaymentFee:      0,
+		AgentFee:        0,
+		AdFee:           0,
+		TaxFee:          0,
+		NetAmount:       0,
+		Status:          0,
+		RawParams:       "",
+		CreatedAt:       time.Now().Unix(),
+		UpdatedAt:       time.Now().Unix(),
+	}
+
+	code = arangodb.CreatePayment(context.TODO(), payment)
+	if code != constant.ArangoDB_Success {
+		return
+	}
+
+	replyTextMessage(provider.LineAtChannelID, replyToken, "購買成功")
 }

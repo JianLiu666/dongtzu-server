@@ -5,6 +5,7 @@ import (
 	"dongtzu/constant"
 	"dongtzu/pkg/model"
 	"encoding/json"
+	"fmt"
 
 	"github.com/arangodb/go-driver"
 	"gitlab.geax.io/demeter/gologger/logger"
@@ -13,6 +14,7 @@ import (
 func CreateConsumer(ctx context.Context, doc *model.Consumer) int {
 	jsonData, err := json.Marshal(doc)
 	if err != nil {
+		logger.Errorf("[ArangoDB][CreateConsumer] failed to marshal: %v", err)
 		return constant.ArangoDB_Driver_Failed
 	}
 
@@ -52,6 +54,36 @@ func CreateConsumer(ctx context.Context, doc *model.Consumer) int {
 	}
 
 	return constant.ArangoDB_Success
+}
+
+func GetConsumerByLineUserID(ctx context.Context, lineUserID string) (*model.Consumer, int) {
+	var result model.Consumer
+
+	query := fmt.Sprintf(`
+		FOR d IN %s 
+			FILTER d.lineUserId == @lineUserId
+		RETURN d`, collectionConsumers)
+	bindVars := map[string]interface{}{
+		"lineUserId": lineUserID,
+	}
+	cursor, err := db.Query(ctx, query, bindVars)
+	defer closeCursor(cursor)
+	if err != nil {
+		logger.Errorf("[ArangoDB][GetConsumerByLineUserID] failed to query: %v", err)
+		return nil, constant.ArangoDB_Driver_Failed
+	}
+
+	for {
+		_, err := cursor.ReadDocument(ctx, &result)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			logger.Errorf("[ArangoDB][GetConsumerByLineUserID] failed to read doc: %v", err)
+			return nil, constant.ArangoDB_Driver_Failed
+		}
+	}
+
+	return &result, constant.ArangoDB_Success
 }
 
 func UpdateConsumerByLineUserId(ctx context.Context, userId string, updates map[string]interface{}) int {

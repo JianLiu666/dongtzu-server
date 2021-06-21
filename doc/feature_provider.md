@@ -12,7 +12,7 @@
 - [x] 發送文字訊息，由 Webhook 轉拋至 Server
 - [x] 查詢 `Consumers`，對不存在的 LineUserId 建立一個專屬的 Document
 - [x] 預建 `ServiceProduct` 與 `PaymentMethod` mock data
-- [ ] 跳過第三方金流串接，實作建立 `Order` 與 `Payment` 流程
+- [x] 跳過第三方金流串接，實作建立 `Order` 與 `Payment` 流程
 
 <br>
 

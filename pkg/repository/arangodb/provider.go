@@ -25,7 +25,7 @@ func GetProviders(ctx context.Context) ([]*model.Provider, int) {
 	cursor, err := db.Query(ctx, query, bindVars)
 	defer closeCursor(cursor)
 	if err != nil {
-		logger.Errorf("[ArangoDB] GetProviders query failed: %v", err)
+		logger.Errorf("[ArangoDB][GetProviders] failed to query: %v", err)
 		return []*model.Provider{}, constant.ArangoDB_Driver_Failed
 	}
 
@@ -35,7 +35,7 @@ func GetProviders(ctx context.Context) ([]*model.Provider, int) {
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
-			logger.Errorf("[ArangoDB] GetProviders cursor failed: %v", err)
+			logger.Errorf("[ArangoDB][GetProviders] failed to read doc: %v", err)
 			return []*model.Provider{}, constant.ArangoDB_Driver_Failed
 		}
 

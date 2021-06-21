@@ -75,6 +75,6 @@ func Init() {
 
 func closeCursor(cursor driver.Cursor) {
 	if err := cursor.Close(); err != nil {
-		logger.Errorf("[ArangoDB] close cursor failed: %v", err)
+		logger.Errorf("[ArangoDB] failed to close cursor: %v", err)
 	}
 }

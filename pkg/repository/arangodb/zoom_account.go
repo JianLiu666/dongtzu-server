@@ -23,7 +23,7 @@ func GetZoomAccounts(ctx context.Context) ([]*model.ZoomAccount, int) {
 	cursor, err := db.Query(ctx, query, bindVars)
 	defer closeCursor(cursor)
 	if err != nil {
-		logger.Errorf("[ArangoDB] GetZoomAccounts query failed: %v", err)
+		logger.Errorf("[ArangoDB][GetZoomAccounts] failed to query: %v", err)
 		return []*model.ZoomAccount{}, constant.ArangoDB_Driver_Failed
 	}
 
@@ -33,7 +33,7 @@ func GetZoomAccounts(ctx context.Context) ([]*model.ZoomAccount, int) {
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
-			logger.Errorf("[ArangoDB] GetZoomAccounts cursor failed: %v", err)
+			logger.Errorf("[ArangoDB][GetZoomAccounts] failed to read doc: %v", err)
 			return []*model.ZoomAccount{}, constant.ArangoDB_Driver_Failed
 		}
 

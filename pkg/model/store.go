@@ -70,7 +70,7 @@ type Order struct {
 	ProviderID       string `json:"providerId"`       // document reference key 買誰提供的服務
 	ServiceProductID string `json:"serviceProductId"` // document reference key 買哪款服務產品
 	PaymentMethodID  string `json:"paymentMethodId"`  // document reference key 選擇的結帳方式
-	Amount           string `json:"amount"`           // 購買數量
+	Amount           int    `json:"amount"`           // 購買數量
 	Status           int    `json:"status"`           // 狀態, 0初始、1付款中、2已付款、3取消
 	CreatedAt        int64  `json:"createdAt"`        // 訂單創建時間
 	UpdatedAt        int64  `json:"updatedAt"`        // 更新時間
@@ -82,13 +82,13 @@ type Payment struct {
 	OrderID         string `json:"orderId"`         // document reference key
 	ConsumerID      string `json:"consumerId"`      // document reference key
 	PaymentMethodID string `json:"paymentMethodId"` // document reference key
-	PaidPrice       int32  `json:"paidPrice"`       // 付款金額
-	PlatformFee     int32  `json:"platformFee"`     // 我們平台所抽的金額
-	PaymentFee      int32  `json:"paymentFee"`      // 金流服務抽成
-	AgentFee        int32  `json:"agentFee"`        // Todo 合作抽成(與廠商合作的分潤)
-	AdFee           int32  `json:"adFee"`           // Todo 業務推廣抽成
-	TaxFee          int32  `json:"taxFee"`          // Todo 勞務報酬報稅
-	NetAmount       int32  `json:"netAmount"`       // 可被發放的金額
+	PaidPrice       int64  `json:"paidPrice"`       // 付款金額
+	PlatformFee     int64  `json:"platformFee"`     // 我們平台所抽的金額
+	PaymentFee      int64  `json:"paymentFee"`      // 金流服務抽成
+	AgentFee        int64  `json:"agentFee"`        // Todo 合作抽成(與廠商合作的分潤)
+	AdFee           int64  `json:"adFee"`           // Todo 業務推廣抽成
+	TaxFee          int64  `json:"taxFee"`          // Todo 勞務報酬報稅
+	NetAmount       int64  `json:"netAmount"`       // 可被發放的金額
 	Status          int    `json:"status"`          // 狀態, 是否成功付款
 	RawParams       string `json:"rawParams"`       // 原始參數
 	CreatedAt       int64  `json:"createdAt"`       // 訂單創建時間

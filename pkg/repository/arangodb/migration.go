@@ -2,6 +2,7 @@ package arangodb
 
 import (
 	"context"
+	"dongtzu/constant"
 	"dongtzu/pkg/model"
 	"time"
 
@@ -27,8 +28,8 @@ func Migration() {
 	seedCollectionPaymentMethods(ctx)
 	seedCollectionZoomAccounts(ctx)
 
-	providers := seedCollectionProviders(ctx)
-	seedCollectionServiceProducts(ctx, providers)
+	seedCollectionProviders(ctx)
+	seedCollectionServiceProducts(ctx)
 }
 
 // helper to check if a collection exists and create it if needed.
@@ -47,7 +48,7 @@ func ensureCollection(ctx context.Context, name string) {
 }
 
 func seedCollectionPaymentMethods(ctx context.Context) {
-	c, err := db.Collection(ctx, collectionZoomAccounts)
+	c, err := db.Collection(ctx, collectionPaymentMethods)
 	if err != nil {
 		logger.Errorf("[ArangoDB][seedCollectionPaymentMethods] failed to open collection: %v", err)
 		return
@@ -135,10 +136,16 @@ func seedCollectionProviders(ctx context.Context) []*model.Provider {
 	return dataSet
 }
 
-func seedCollectionServiceProducts(ctx context.Context, providers []*model.Provider) {
+func seedCollectionServiceProducts(ctx context.Context) {
 	c, err := db.Collection(ctx, collectionServiceProducts)
 	if err != nil {
 		logger.Errorf("[ArangoDB][seedCollectionServiceProducts] failed to open collection: %v", err)
+		return
+	}
+
+	providers, code := GetProviders(ctx)
+	if code != constant.ArangoDB_Success {
+		logger.Errorf("[ArangoDB][seedCollectionServiceProducts] failed to get providers: %v", err)
 		return
 	}
 
