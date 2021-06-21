@@ -25,10 +25,10 @@ func GetUncreatedMeetingUrlSchedules(ctx context.Context) ([]*model.Schedule, in
 		FOR d IN Schedules
 			FILTER d.meetingUrl == ""
 				AND d.count >= d.minConsumerLimit 
-				AND d.startTimestamp <= @startTimestamp 
+				AND d.courseStartAt <= @courseStartAt 
 			RETURN d`
 	bindVars := map[string]interface{}{
-		"startTimestamp": time.Now().Add(30 * time.Minute).UTC().Unix(),
+		"courseStartAt": time.Now().Add(30 * time.Minute).UTC().Unix(),
 	}
 	cursor, err := db.Query(ctx, query, bindVars)
 	defer closeCursor(cursor)
@@ -57,8 +57,6 @@ func GetUncreatedMeetingUrlSchedules(ctx context.Context) ([]*model.Schedule, in
 //
 // @param ctx
 //
-// @param startTimestamp
-//
 // @return []*model.Schedule
 //
 // @return int status code
@@ -69,10 +67,10 @@ func GetReadyStartSchedules(ctx context.Context) ([]*model.Schedule, int) {
 		FOR d IN Schedules 
 			FILTER d.meetingUrl != "" 
 				AND d.count >= d.minConsumerLimit 
-				AND d.startTimestamp <= @startTimestamp 
+				AND d.courseStartAt <= @courseStartAt 
 			RETURN d`
 	bindVars := map[string]interface{}{
-		"startTimestamp": time.Now().Add(10 * time.Minute).UTC().Unix(),
+		"courseStartAt": time.Now().Add(10 * time.Minute).UTC().Unix(),
 	}
 	cursor, err := db.Query(ctx, query, bindVars)
 	if err != nil {

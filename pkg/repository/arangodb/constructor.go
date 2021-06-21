@@ -14,11 +14,18 @@ import (
 )
 
 const (
-	collectionAppointments = "Appointments"
-	collectionConsumers    = "Consumers"
-	collectionProviders    = "Providers"
-	collectionSchedules    = "Schedules"
-	collectionZoomAccounts = "ZoomAccounts"
+	collectionAppointments    = "Appointments"
+	collectionCourses         = "Courses"
+	collectionConsumers       = "Consumers"
+	collectionFeedbacks       = "Feedbacks"
+	collectionMonthReceipts   = "MonthReceipts"
+	collectionOrders          = "Orders"
+	collectionPayments        = "Payments"
+	collectionPaymentMethods  = "PaymentMethods"
+	collectionProviders       = "Providers"
+	collectionSchedules       = "Schedules"
+	collectionServiceProducts = "ServiceProducts"
+	collectionZoomAccounts    = "ZoomAccounts"
 )
 
 var once sync.Once

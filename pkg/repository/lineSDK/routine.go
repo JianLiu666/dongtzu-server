@@ -63,8 +63,10 @@ func handleMessage(provider *model.Provider, event *linebot.Event) {
 	case *linebot.TextMessage:
 		switch message.Text {
 		case "測試購買":
+			createConsumer(provider, event.Source.UserID)
 
 		case "測試預約":
+			createConsumer(provider, event.Source.UserID)
 
 		case "測試流程":
 			replyFlexMessageExample(provider.LineAtChannelID, event.ReplyToken)

@@ -40,11 +40,11 @@ func CreateAppointment(ctx context.Context, appt *model.Appointment) int {
 	// 取得 consumer 在指定時間區段內的 appointments
 	cursor1, err := db.Query(
 		trxCtx,
-		"FOR d IN Appointments FILTER d.consumerId == @consumerId AND d.startTimestamp >= @startTimestamp AND d.startTimestamp < @endTimestamp RETURN d",
+		"FOR d IN Appointments FILTER d.consumerId == @consumerId AND d.courseStartAt >= @courseStartAt AND d.courseStartAt < @courseEndAt RETURN d",
 		map[string]interface{}{
-			"consumerId":     appt.ConsumerID,
-			"startTimestamp": appt.StartTimestamp,
-			"endTimestamp":   appt.EndTimestamp,
+			"consumerId":    appt.ConsumerID,
+			"courseStartAt": appt.CourseStartAt,
+			"courseEndAt":   appt.CourseEndAt,
 		},
 	)
 	defer closeCursor(cursor1)

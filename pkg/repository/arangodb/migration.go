@@ -11,9 +11,16 @@ import (
 func Migration() {
 	ctx := context.TODO()
 	ensureCollection(ctx, collectionAppointments)
+	ensureCollection(ctx, collectionCourses)
 	ensureCollection(ctx, collectionConsumers)
+	ensureCollection(ctx, collectionFeedbacks)
+	ensureCollection(ctx, collectionMonthReceipts)
+	ensureCollection(ctx, collectionOrders)
+	ensureCollection(ctx, collectionPayments)
+	ensureCollection(ctx, collectionPaymentMethods)
 	ensureCollection(ctx, collectionProviders)
 	ensureCollection(ctx, collectionSchedules)
+	ensureCollection(ctx, collectionServiceProducts)
 	ensureCollection(ctx, collectionZoomAccounts)
 
 	seedCollectionProviders(ctx)

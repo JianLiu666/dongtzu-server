@@ -12,8 +12,8 @@ func createMeetingUrl() {
 	schedules, _ := arangodb.GetUncreatedMeetingUrlSchedules(context.TODO())
 
 	for _, s := range schedules {
-		scheduleTime := time.Unix(s.StartTimestamp, 0)
-		minuteInteger := (s.EndTimestamp - s.StartTimestamp) / 60
+		scheduleTime := time.Unix(s.CourseStartAt, 0)
+		minuteInteger := (s.CourseEndAt - s.CourseStartAt) / 60
 		meetingUrl, code := zoomSDK.GetMeetingUrl(scheduleTime, int(minuteInteger))
 
 		if code != constant.ZoomSDK_Success {
