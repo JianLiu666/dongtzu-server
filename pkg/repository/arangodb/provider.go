@@ -183,9 +183,9 @@ function (Params) {
  */
 func formatCreateProviderMap(registerInfo model.RegisterProviderReq) (map[string]interface{}, error) {
 	dataMap := map[string]interface{}{}
-	var now int
+	var now int64
 	if registerInfo.Status == constant.Provider_Status_Saved {
-		now = int(time.Now().Unix())
+		now = time.Now().Unix()
 	}
 	provider := model.Provider{
 		LineUserID:          registerInfo.LineUserID,

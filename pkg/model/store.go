@@ -123,7 +123,7 @@ type Provider struct {
 	MemeberTerm         bool   `json:"memeberTerm"`         // 會員條款
 	PrivacyTerm         bool   `json:"privacyTerm"`         // 隱私全條款
 	Status              int    `json:"status"`              // 狀態 0: 暫存, 1: 確認送出, 2: 審核中, 3: 審核完成, 4: 審核不通過, 5: 例外處理
-	CreatedAt           int    `json:"createdAt"`           // 創建時間
+	CreatedAt           int64  `json:"createdAt"`           // 創建時間
 	Blocked             bool   `json:"bolcked"`             // Todo 停權blocked, 停權處理流程
 	// Todo 應該還有個google calendar 授權成功拿到的token
 }
@@ -143,9 +143,9 @@ type Schedule struct {
 type ServiceProduct struct {
 	ID              string `json:"_key,omitempty"`  // increment unique key
 	ProviderID      string `json:"providerId"`      // document reference key
-	CountPerPack    string `json:"pack"`            // 一包多少堂
-	Price           string `json:"price"`           // 一堂多少價格
-	ExpiredDuration int32  `json:"expiredDuration"` // 多久過期
+	CountPerPack    int    `json:"countPerPack"`    // 一包多少堂
+	Price           int    `json:"price"`           // 一堂多少價格
+	ExpiredDuration int64  `json:"expiredDuration"` // 多久過期
 	CreatedAt       int64  `json:"createdAt"`       //
 	DeletedAt       int64  `json:"deletedAt"`       // soft delete (讓order history可以reference)
 }
