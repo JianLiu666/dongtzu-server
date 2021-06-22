@@ -23,10 +23,11 @@
   - [ ] API Response Schema
   - [ ] 處理流程
     - [ ] 檢查 Payload 是否符合格式
-    - [ ] 寫入資料庫 (transaction)
-      - [ ] 1. 檢查指定 Schedule 是否符合預約規定 (e.g. 人數上限)
-      - [ ] 2. 檢查 Consumer 在相同時段是否存在其他 Appointments
-      - [ ] 3. create Appointment
-      - [ ] 4. 更新 schedule count(當前人數)
+    - [x] 寫入資料庫 (transaction)
+      - [x] 1. 檢查指定 Schedule 是否符合預約規定 (e.g. 人數上限)
+      - [x] 2. 檢查 Consumer 在相同時段是否存在其他 Appointments
+      - [ ] 3. 檢查 Consumer 是否還有足夠的剩餘堂數
+      - [x] 4. create Appointment
+      - [x] 5. 更新 schedule count(當前人數)
     - [ ] 傳送 appointment 到 scheduler cache (對應 [Scheduler 處理 appointments 的解 3](./scheduler.md#scheduler-1))
     - [ ] Response
