@@ -114,6 +114,7 @@ func buyDefaultProductExample(provider *model.Provider, userID, replyToken strin
 	if len(products) == 0 {
 		return
 	}
+
 	consumer, code := arangodb.GetConsumerByLineUserID(context.TODO(), userID)
 	if code != constant.ArangoDB_Success {
 		return
@@ -124,10 +125,18 @@ func buyDefaultProductExample(provider *model.Provider, userID, replyToken strin
 		return
 	}
 
+	paymentMethods, code := arangodb.GetPaymentMethods(context.TODO())
+	if code != constant.ArangoDB_Success {
+		return
+	}
+	if len(paymentMethods) == 0 {
+		return
+	}
+
 	payment := &model.Payment{
 		OrderID:         order.ID,
 		ConsumerID:      consumer.ID,
-		PaymentMethodID: "501713", // TODO: Mock
+		PaymentMethodID: paymentMethods[0].ID,
 		PaidPrice:       int64(products[0].Price),
 		PlatformFee:     0,
 		PaymentFee:      0,
