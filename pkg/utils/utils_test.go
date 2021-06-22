@@ -12,3 +12,10 @@ func TestConvert(t *testing.T) {
 
 	fmt.Println((t2.Unix() - t1.Unix()) / 60)
 }
+
+func TestUnixTimestamp(t *testing.T) {
+	now := time.Now()
+
+	fmt.Printf("%v\n", now.UTC().Unix())
+	fmt.Printf("%v\n", now.Unix())
+}

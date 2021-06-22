@@ -151,7 +151,7 @@ func mockCollectionSchedules(ctx context.Context) {
 
 	// 取得每隔半小時的 timestamp
 	for {
-		timestampRange = append(timestampRange, startTime.UTC().Unix())
+		timestampRange = append(timestampRange, startTime.Unix())
 		startTime = startTime.Add(30 * time.Minute)
 		if startTime.Day() != startDay {
 			break

@@ -4,18 +4,14 @@ import (
 	"context"
 	"dongtzu/constant"
 	"dongtzu/pkg/model"
+	"encoding/json"
 
 	"github.com/arangodb/go-driver"
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
 // 建立預約
-//
-// 1. 檢查 schedule 預約人數是否已經達到上限
-//
-// 2. 檢查 consumer 在相同時段中是否已經有其他的 appointment 存在
-//
-// 3. 建立 appointment 並更新 schedule 統計人數
+// TODO: 還沒有檢查 consumer 的剩餘堂數
 //
 // @param ctx
 //
@@ -23,100 +19,66 @@ import (
 //
 // @return int status code
 func CreateAppointment(ctx context.Context, appt *model.Appointment) int {
-	trxId, err := db.BeginTransaction(
-		ctx,
-		driver.TransactionCollections{
-			Read:  []string{"Schedules"},
-			Write: []string{"Schedules", "Appointments"},
-		},
-		nil,
-	)
+	jsonData, err := json.Marshal(appt)
 	if err != nil {
-		logger.Errorf("[ArangoDB][CreateAppointment] begin transaction failed: %s", err)
-		return constant.ArangoDB_Driver_Failed
-	}
-	trxCtx := driver.WithTransactionID(ctx, trxId)
-
-	// 取得 consumer 在指定時間區段內的 appointments
-	cursor1, err := db.Query(
-		trxCtx,
-		"FOR d IN Appointments FILTER d.consumerId == @consumerId AND d.courseStartAt >= @courseStartAt AND d.courseStartAt < @courseEndAt RETURN d",
-		map[string]interface{}{
-			"consumerId":    appt.ConsumerID,
-			"courseStartAt": appt.CourseStartAt,
-			"courseEndAt":   appt.CourseEndAt,
-		},
-	)
-	defer closeCursor(cursor1)
-	if err != nil {
-		logger.Errorf("[ArangoDB][CreateAppointment] qeury failed: %s", err)
-		if err = db.AbortTransaction(ctx, trxId, nil); err != nil {
-			logger.Errorf("[ArangoDB][CreateAppointment] abort transaction failed: %s", err)
-		}
-		return constant.ArangoDB_Driver_Failed
+		logger.Errorf("[ArangoDB][CreateAppointment] failed to marshal: %s", err)
 	}
 
-	// 檢查 consumer 在指定時間區段內是否已經有其他的 appointment 存在
-	// 若有則表示預約衝突, 中斷 transaction
-	tmp := &model.Appointment{}
-	_, err = cursor1.ReadDocument(ctx, tmp)
-	if !driver.IsNoMoreDocuments(err) {
-		if err == nil {
-			logger.Debugf("[ArangoDB][CreateAppointment] consumer %s has other appointments already.", appt.ConsumerID)
-		} else {
-			logger.Errorf("[ArangoDB][CreateAppointment] read document failed: %s", err)
+	aql := `
+	function (Params) {
+		const db = require('@arangodb').db;
+		const savedObj = JSON.parse(Params[0]);
+		const scheduleCol = db._collection("Schedules");
+		const apptCol = db._collection("Appointments");
+
+		// 檢查 schedule 預約人數是否已經達到上限
+		scheduleDoc = scheduleCol.firstExample({_key: savedObj.scheduleId});
+		if (!scheduleDoc || !scheduleDoc._key || scheduleDoc._key.length == 0) {
+			return -1;
 		}
-		if err = db.AbortTransaction(ctx, trxId, nil); err != nil {
-			logger.Errorf("[ArangoDB][CreateAppointment] abort transaction failed: %s", err)
-			return constant.ArangoDB_Driver_Failed
+		if (scheduleDoc.count+1 > scheduleDoc.maxConsumerLimit) {
+			return -2;
 		}
+
+		// 檢查 consumer 在相同時段中是否已經有其他的 appointment 存在
+		apptDocs = apptCol.closedRange("courseStartAt", savedObj.courseStartAt, savedObj.courseEndAt).toArray();
+		var found = false;
+		for (var i = 0; i < apptDocs.length; i++) {
+			if (apptDocs[i].consumerId == savedObj.consumerId) {
+				found = true;
+				break;
+			}
+		}
+		if (found) {
+			return -3;
+		}
+
+		// 建立 appointment 並更新 schedule 統計人數
+		scheduleCol.update(scheduleDoc._key, {count: scheduleDoc.count+1});
+		apptCol.insert(savedObj);
+
+		return 1;
+	}`
+
+	options := &driver.TransactionOptions{
+		MaxTransactionSize: 100000,
+		WriteCollections:   []string{collectionSchedules, collectionAppointments},
+		ReadCollections:    []string{collectionSchedules, collectionAppointments},
+		Params:             []interface{}{string(jsonData)},
+		WaitForSync:        false,
+	}
+
+	code, err := db.Transaction(ctx, aql, options)
+	if err != nil {
+		logger.Errorf("[ArangoDB][CreateAppointment] transaction failed: %v", err)
+		return constant.ArangoDB_Driver_Failed
+	}
+	if code.(float64) != 1 {
+		logger.Errorf("[ArangoDB][CreateAppointment] invalid transaction operation: %v", code)
 		return constant.ArangoDB_Invalid_Operation
 	}
 
-	// 取得 schedule
-	result := &model.Schedule{}
-	scheduleCol, _ := db.Collection(trxCtx, "Schedules")
-	_, err = scheduleCol.ReadDocument(trxCtx, appt.ScheduleID, result)
-	if err != nil {
-		logger.Errorf("[ArangoDB][CreateAppointment] read document failed: %s", err)
-		if err = db.AbortTransaction(ctx, trxId, nil); err != nil {
-			logger.Errorf("[ArangoDB][CreateAppointment] abort transaction failed: %s", err)
-		}
-		return constant.ArangoDB_Driver_Failed
-	}
-
-	// 確保 schedule 人數尚未達到規定上限
-	if result.Count+1 > result.MaxConsumerLimit {
-		logger.Debugf("[ArangoDB][CreateAppointment] schedule %s is fulled.", appt.ScheduleID)
-		if err = db.AbortTransaction(ctx, trxId, nil); err != nil {
-			logger.Errorf("[ArangoDB][CreateAppointment] abort transaction failed: %s", err)
-			return constant.ArangoDB_Driver_Failed
-		}
-		return constant.ArangoDB_Invalid_Operation
-	}
-
-	// 更新 schedule 預約人數
-	result.Count++
-	_, err = scheduleCol.UpdateDocument(trxCtx, result.ID, map[string]interface{}{"count": result.Count})
-	if err != nil {
-		logger.Errorf("[ArangoDB][CreateAppointment] update document failed: %s", err)
-		return constant.ArangoDB_Driver_Failed
-	}
-
-	// 寫入 appointment
-	apptCol, _ := db.Collection(trxCtx, "Appointments")
-	_, err = apptCol.CreateDocument(trxCtx, appt)
-	if err != nil {
-		logger.Errorf("[ArangoDB][CreateAppointment] create document failed: %s", err)
-		return constant.ArangoDB_Driver_Failed
-	}
-
-	if err = db.CommitTransaction(ctx, trxId, nil); err != nil {
-		logger.Errorf("[ArangoDB][CreateAppointment] commit transaction failed: %s", err)
-		return constant.ArangoDB_Driver_Failed
-	}
-
-	return 0
+	return constant.ArangoDB_Success
 }
 
 // 取得與條件相符的預約

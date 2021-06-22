@@ -9,7 +9,10 @@ import (
 )
 
 func createMeetingUrl() {
-	schedules, _ := arangodb.GetUncreatedMeetingUrlSchedules(context.TODO())
+	schedules, code := arangodb.GetUncreatedMeetingUrlSchedules(context.TODO())
+	if code != constant.ArangoDB_Success {
+		return
+	}
 
 	for _, s := range schedules {
 		scheduleTime := time.Unix(s.CourseStartAt, 0)

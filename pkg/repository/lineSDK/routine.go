@@ -5,6 +5,7 @@ import (
 	"dongtzu/constant"
 	"dongtzu/pkg/model"
 	"dongtzu/pkg/repository/arangodb"
+	"fmt"
 	"time"
 
 	"github.com/line/line-bot-sdk-go/linebot"
@@ -68,6 +69,7 @@ func handleMessage(provider *model.Provider, event *linebot.Event) {
 
 		case "測試預約":
 			createConsumer(provider, event.Source.UserID)
+			scheduleExample(provider, event.Source.UserID, event.ReplyToken)
 
 		case "測試流程":
 			replyFlexMessageExample(provider.LineAtChannelID, event.ReplyToken)
@@ -112,6 +114,7 @@ func buyDefaultProductExample(provider *model.Provider, userID, replyToken strin
 		return
 	}
 	if len(products) == 0 {
+		logger.Warnf("[LineSDK] did not found any service products.")
 		return
 	}
 
@@ -130,6 +133,7 @@ func buyDefaultProductExample(provider *model.Provider, userID, replyToken strin
 		return
 	}
 	if len(paymentMethods) == 0 {
+		logger.Warnf("[LineSDK] did not found any payment methods.")
 		return
 	}
 
@@ -156,4 +160,54 @@ func buyDefaultProductExample(provider *model.Provider, userID, replyToken strin
 	}
 
 	replyTextMessage(provider.LineAtChannelID, replyToken, "購買成功")
+}
+
+func scheduleExample(provider *model.Provider, userID, replyToken string) {
+	consumer, code := arangodb.GetConsumerByLineUserID(context.TODO(), userID)
+	if code != constant.ArangoDB_Success {
+		return
+	}
+
+	schedules, code := arangodb.GetLessThanHalfSchedulesByProviderID(context.TODO(), provider.ID)
+	if code != constant.ArangoDB_Success {
+		return
+	}
+	if len(schedules) == 0 {
+		logger.Warnf("[LineSDK] did not found any schedules.")
+		return
+	}
+
+	startTime := time.Now()
+	if startTime.Minute() < 30 {
+		startTime = startTime.Round(time.Hour).Add(30 * time.Minute)
+	} else {
+		startTime = startTime.Round(time.Hour)
+	}
+	endTime := startTime.Add(30 * time.Minute)
+
+	appt := &model.Appointment{
+		ProviderID:       provider.ID,
+		ScheduleID:       schedules[0].ID,
+		ConsumerID:       consumer.ID,
+		FeedbackID:       "",
+		PaymentMethodID:  "",
+		MonthReceiptID:   "",
+		ConsumerLineID:   userID,
+		PaymentMethodFee: 0,
+		Status:           constant.Appointment_Status_Unsend_MeetingUrl,
+		Note:             "",
+		CourseStartAt:    startTime.Unix(),
+		CourseEndAt:      endTime.Unix(),
+		CreatedAt:        time.Now().Unix(),
+		UpdatedAt:        time.Now().Unix(),
+		DeletedAt:        -1,
+		RescheduledAt:    -1,
+	}
+
+	code = arangodb.CreateAppointment(context.TODO(), appt)
+	if code != constant.ArangoDB_Success {
+		return
+	}
+
+	replyTextMessage(provider.LineAtChannelID, replyToken, fmt.Sprintf("預約成功，上課時間: %v", startTime.Format("2006/01/02 15:04:05")))
 }

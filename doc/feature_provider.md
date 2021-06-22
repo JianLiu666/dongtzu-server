@@ -19,9 +19,9 @@
 ## 測試預約
 
 - [x] 發送文字訊息，由 Webhook 轉拋至 Server
-- [ ] 透過 Migration 預建時間範圍內每隔30分鐘一筆的 Schedule mock data
+- [x] 透過 Migration 預建時間範圍內每隔30分鐘一筆的 Schedule mock data
 - [x] 查詢 `Consumers`，對不存在的 LineUserId 建立一個專屬的 Document
-- [ ] 立即預約距離最近的 Schedule，實作建立 `Appointment` 流程
+- [x] 立即預約距離最近的 Schedule，實作建立 `Appointment` 流程
 
 <br>
 
