@@ -4,6 +4,7 @@ import (
 	"context"
 	"dongtzu/constant"
 	"dongtzu/pkg/model"
+	"encoding/json"
 	"time"
 
 	"github.com/arangodb/go-driver"
@@ -25,11 +26,12 @@ func Migration() {
 	ensureCollection(ctx, collectionServiceProducts)
 	ensureCollection(ctx, collectionZoomAccounts)
 
-	seedCollectionPaymentMethods(ctx)
-	seedCollectionZoomAccounts(ctx)
+	mockCollectionPaymentMethods(ctx)
+	mockCollectionZoomAccounts(ctx)
 
-	seedCollectionProviders(ctx)
-	seedCollectionServiceProducts(ctx)
+	mockCollectionProviders(ctx)
+	mockCollectionServiceProducts(ctx)
+	mockCollectionSchedules(ctx)
 }
 
 // helper to check if a collection exists and create it if needed.
@@ -47,10 +49,10 @@ func ensureCollection(ctx context.Context, name string) {
 	logger.Debugf("[ArangoDB][ensureCollection] %v ok.", name)
 }
 
-func seedCollectionPaymentMethods(ctx context.Context) {
+func mockCollectionPaymentMethods(ctx context.Context) {
 	c, err := db.Collection(ctx, collectionPaymentMethods)
 	if err != nil {
-		logger.Errorf("[ArangoDB][seedCollectionPaymentMethods] failed to open collection: %v", err)
+		logger.Errorf("[ArangoDB][mockCollectionPaymentMethods] failed to open collection: %v", err)
 		return
 	}
 
@@ -64,17 +66,17 @@ func seedCollectionPaymentMethods(ctx context.Context) {
 	for _, data := range dataSet {
 		_, err = c.CreateDocument(ctx, data)
 		if err != nil {
-			logger.Errorf("[ArangoDB][seedCollectionPaymentMethods] failed to create document: %v", err)
+			logger.Errorf("[ArangoDB][mockCollectionPaymentMethods] failed to create document: %v", err)
 		}
 	}
 
-	logger.Debugf("[ArangoDB][seedCollectionPaymentMethods] done.")
+	logger.Debugf("[ArangoDB][mockCollectionPaymentMethods] done.")
 }
 
-func seedCollectionProviders(ctx context.Context) []*model.Provider {
+func mockCollectionProviders(ctx context.Context) []*model.Provider {
 	c, err := db.Collection(ctx, collectionProviders)
 	if err != nil {
-		logger.Errorf("[ArangoDB][seedCollectionProviders] failed to open collection: %v", err)
+		logger.Errorf("[ArangoDB][mockCollectionProviders] failed to open collection: %v", err)
 		return []*model.Provider{}
 	}
 
@@ -128,24 +130,105 @@ func seedCollectionProviders(ctx context.Context) []*model.Provider {
 	for _, data := range dataSet {
 		_, err = c.CreateDocument(ctx, data)
 		if err != nil {
-			logger.Errorf("[ArangoDB][seedCollectionProviders] failed to create document: %v", err)
+			logger.Errorf("[ArangoDB][mockCollectionProviders] failed to create document: %v", err)
 		}
 	}
 
-	logger.Debugf("[ArangoDB][seedCollectionProviders] done.")
+	logger.Debugf("[ArangoDB][mockCollectionProviders] done.")
 	return dataSet
 }
 
-func seedCollectionServiceProducts(ctx context.Context) {
+func mockCollectionSchedules(ctx context.Context) {
+	providers, code := GetProviders(ctx)
+	if code != constant.ArangoDB_Success {
+		logger.Errorf("[ArangoDB][mockCollectionSchedules] failed to get providers: %v", code)
+		return
+	}
+
+	timestampRange := []int64{}
+	startTime := time.Now().Round(time.Hour)
+	startDay := startTime.Day()
+
+	// 取得每隔半小時的 timestamp
+	for {
+		timestampRange = append(timestampRange, startTime.UTC().Unix())
+		startTime = startTime.Add(30 * time.Minute)
+		if startTime.Day() != startDay {
+			break
+		}
+	}
+
+	dataSet := []*model.Schedule{}
+	for _, p := range providers {
+		for i := 0; i < len(timestampRange)-1; i++ {
+			schedule := &model.Schedule{
+				CourseID:         "",
+				ProviderID:       p.ID,
+				CourseStartAt:    timestampRange[i],
+				CourseEndAt:      timestampRange[i+1],
+				MinConsumerLimit: 1,
+				MaxConsumerLimit: 30,
+				Count:            0,
+				MeetingUrl:       "",
+			}
+
+			dataSet = append(dataSet, schedule)
+		}
+	}
+
+	jsonData, err := json.Marshal(dataSet)
+	if err != nil {
+		logger.Errorf("[ArangoDB][mockCollectionSchedules] failed to marshal: %v", err)
+	}
+
+	aql := `
+	function (Params) {
+		const db = require('@arangodb').db;
+		const savedObjs = JSON.parse(Params[0]);
+		const scheduleCol = db._collection("Schedules");
+		
+		savedObjs.forEach(function(obj) {
+			doc = scheduleCol.firstExample({
+				providerId: obj.providerId, 
+				courseStartAt: obj.courseStartAt, 
+				courseEndAt: obj.courseEndAt});
+
+			if (doc && !doc._key && doc._key.length > 0) {
+				return;
+			}
+
+			scheduleCol.insert(obj);
+		})
+
+		return 1;
+	}`
+
+	options := &driver.TransactionOptions{
+		MaxTransactionSize: 100000,
+		WriteCollections:   []string{collectionSchedules},
+		ReadCollections:    []string{collectionSchedules},
+		Params:             []interface{}{string(jsonData)},
+		WaitForSync:        false,
+	}
+
+	_, err = db.Transaction(ctx, aql, options)
+	if err != nil {
+		logger.Errorf("[ArangoDB][mockCollectionSchedules] transaction failed: %v", err)
+	}
+
+	logger.Debugf("[ArangoDB][mockCollectionSchedules] done.")
+}
+
+func mockCollectionServiceProducts(ctx context.Context) {
 	c, err := db.Collection(ctx, collectionServiceProducts)
 	if err != nil {
-		logger.Errorf("[ArangoDB][seedCollectionServiceProducts] failed to open collection: %v", err)
+		logger.Errorf("[ArangoDB][mockCollectionServiceProducts] failed to open collection: %v", err)
 		return
 	}
 
 	providers, code := GetProviders(ctx)
 	if code != constant.ArangoDB_Success {
-		logger.Errorf("[ArangoDB][seedCollectionServiceProducts] failed to get providers: %v", err)
+		logger.Errorf("[ArangoDB][mockCollectionServiceProducts] failed to get providers: %v", code)
 		return
 	}
 
@@ -164,17 +247,17 @@ func seedCollectionServiceProducts(ctx context.Context) {
 	for _, data := range dataSet {
 		_, err = c.CreateDocument(ctx, data)
 		if err != nil {
-			logger.Errorf("[ArangoDB][seedCollectionServiceProducts] failed to create document: %v", err)
+			logger.Errorf("[ArangoDB][mockCollectionServiceProducts] failed to create document: %v", err)
 		}
 	}
 
-	logger.Debugf("[ArangoDB][seedCollectionServiceProducts] done.")
+	logger.Debugf("[ArangoDB][mockCollectionServiceProducts] done.")
 }
 
-func seedCollectionZoomAccounts(ctx context.Context) {
+func mockCollectionZoomAccounts(ctx context.Context) {
 	c, err := db.Collection(ctx, collectionZoomAccounts)
 	if err != nil {
-		logger.Errorf("[ArangoDB][seedCollectionZoomAccounts] failed to open collection: %v", err)
+		logger.Errorf("[ArangoDB][mockCollectionZoomAccounts] failed to open collection: %v", err)
 		return
 	}
 
@@ -194,9 +277,9 @@ func seedCollectionZoomAccounts(ctx context.Context) {
 	for _, data := range dataSet {
 		_, err = c.CreateDocument(ctx, data)
 		if err != nil {
-			logger.Errorf("[ArangoDB][seedCollectionZoomAccounts] failed to create document: %v", err)
+			logger.Errorf("[ArangoDB][mockCollectionZoomAccounts] failed to create document: %v", err)
 		}
 	}
 
-	logger.Debugf("[ArangoDB][seedCollectionZoomAccounts] done.")
+	logger.Debugf("[ArangoDB][mockCollectionZoomAccounts] done.")
 }

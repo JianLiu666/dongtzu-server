@@ -130,7 +130,7 @@ type Provider struct {
 
 type Schedule struct {
 	ID               string `json:"_key,omitempty"`   // increment unique key
-	CourseId         string `json:"courseId"`         // document reference key
+	CourseID         string `json:"courseId"`         // document reference key
 	ProviderID       string `json:"providerId"`       // document reference key
 	CourseStartAt    int64  `json:"courseStartAt"`    // 課程開始時間
 	CourseEndAt      int64  `json:"courseEndAt"`      // 課程結束時間
