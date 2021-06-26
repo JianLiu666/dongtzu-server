@@ -12,10 +12,11 @@ var (
 )
 
 type config struct {
-	ArangoDB ArangoConfig `yaml:"arangoDB"`
-	Fiber    FiberConfig  `yaml:"fiber"`
-	Github   GithubConfig `yaml:"github"`
-	Zoom     ZoomConfig   `yaml:"zoom"`
+	ArangoDB ArangoConfig   `yaml:"arangoDB"`
+	Fiber    FiberConfig    `yaml:"fiber"`
+	Github   GithubConfig   `yaml:"github"`
+	Zoom     ZoomConfig     `yaml:"zoom"`
+	NewebPay NewebPayConfig `yaml:"newebPay"`
 }
 
 func NewFromViper() (*config, error) {
@@ -57,4 +58,12 @@ type GithubConfig struct {
 
 type ZoomConfig struct {
 	MeetingExtendedTime int `yaml:"meetingExtendedTime"`
+}
+
+type NewebPayConfig struct {
+	APIUrl          string `yaml:"apiUrl"`
+	APIVersion      string `yaml:"apiVersion"`
+	MerchantID      string `yaml:"merchantID"`
+	MerchantHashKey string `yaml:"merchantHashKey"`
+	MerchantIV      string `yaml:"merchantIV"`
 }

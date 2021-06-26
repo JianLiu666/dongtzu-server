@@ -70,7 +70,7 @@
 
 藍新金流測試帳密
 
- - cwww.newebay.com
+ - https://cwww.newebpay.com/
  - ts0542648@gmail.com
  - P@ssw0rd
 

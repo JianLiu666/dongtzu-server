@@ -18,7 +18,12 @@ func Init() {
 
 	server = fiber.New()
 	setMiddelWare(server)
+
 	server.Post("/webhook/:channelId", lineWebhook())
+
+	server.Post("/newebpay", hookNewebpay())
+	server.Get("/newebpay", hookNewebpay())
+	server.Get("/example", getNewebPayOrderInfo())
 
 	dt := server.Group("/dt")
 	dt.Post("/appointment", appointment())
