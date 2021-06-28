@@ -642,5 +642,5 @@ func formatUpdateProviderMap(providerInfo model.UpdateProviderInfoReq) (map[stri
 }
 
 func formatServiceProductMapList(params []model.SvcProduct) (map[string]interface{}, error) {
-
+	return nil, nil
 }
