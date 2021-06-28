@@ -94,7 +94,7 @@ func createConsumer(provider *model.Provider, userID string) {
 		ProviderID:              provider.ID,
 		ProviderLineAtChannelID: provider.LineAtChannelID,
 		LineFollowingStatus:     constant.Consumer_LineStatus_Following,
-		CreatedAt:               int(time.Now().Unix()),
+		CreatedAt:               time.Now().Unix(),
 	}
 
 	_ = arangodb.CreateConsumer(context.TODO(), doc)
@@ -141,7 +141,7 @@ func buyDefaultProductExample(provider *model.Provider, userID, replyToken strin
 		OrderID:         order.ID,
 		ConsumerID:      consumer.ID,
 		PaymentMethodID: paymentMethods[0].ID,
-		PaidPrice:       int64(products[0].Price),
+		PaidPrice:       int32(products[0].Price),
 		PlatformFee:     0,
 		PaymentFee:      0,
 		AgentFee:        0,

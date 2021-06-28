@@ -25,6 +25,38 @@ type Course struct {
 	SchduleID string `json:"scheduleId"`     // document reference key
 	Title     string `json:"title"`          // 課程標題
 	Content   string `json:"content"`        // 課程內容
+	// Todo
+	// Tag ...
+}
+
+type Provider struct {
+	ID                  string `json:"_key,omitempty"`      // increment unique key
+	LineUserID          string `json:"lineUserId"`          // uniq Line userID (e.g. U123xxxxxxxxdef)
+	RealName            string `json:"realName"`            // 中文姓名(真實)
+	LineAtName          string `json:"lineAtName"`          // 申請Line官方帳號名稱
+	LineAtID            string `json:"lineAtId"`            // 申請Line官方帳號ID(Todo 暫不實作)
+	LineAtChannelID     string `json:"lineAtChannelId"`     // 申請Line官方帳號 ChannelID
+	LineAtChannelSecret string `json:"lineAtChannelSecret"` // 申請Line官方帳號 ChannelSecret
+	LineAtAccessToken   string `json:"lineAtAccessToken"`   // 申請Line官方帳號 AccessToken
+	CountryCode         string `json:"countryCode"`         // 手機國碼(Todo 暫不實作)
+	LineID              string `json:"lineId"`              // 聯絡的個人Line ID
+	PhoneNum            string `json:"phoneNum"`            // 手機號碼
+	ConfirmedPhoneNum   string `json:"confirmedPhoneNum"`   // 認證過的手機號碼(Todo 二階段手機驗證)
+	GmailAddr           string `json:"gmailAddr"`           // Gamil
+	ConfirmedGmailAddr  string `json:"confirmedGmailAddr"`  // 認證過的Gamil(Todo 發認證信)
+	GCalSync            bool   `json:"gCalSync"`            // Google Calendar 授權成功
+	GUUID               string `json:"guuid"`               // google uuid
+	GToken              string `json:"gToken"`              // google token
+	GRawData            string `json:"gRawData"`            // google raw data
+	InviteCode          string `json:"inviteCode"`          // 企業用戶，業務推廣碼
+	InviterID           string `json:"inviterId"`           // invite code對應的provider
+	SharableCode        string `json:"sharableCode"`        // 自己的推廣碼
+	MemeberTerm         bool   `json:"memeberTerm"`         // 會員條款
+	PrivacyTerm         bool   `json:"privacyTerm"`         // 隱私全條款
+	Status              int    `json:"status"`              // 狀態 0: 暫存, 1: 確認送出, 2: 審核中, 3: 審核完成, -1: 審核不通過, -2: 例外處理
+	CreatedAt           int64  `json:"createdAt"`           // 創建時間
+	Blocked             bool   `json:"bolcked"`             // Todo 停權blocked, 停權處理流程
+	// Todo 應該還有個google calendar 授權成功拿到的token
 }
 
 type Consumer struct {
@@ -33,7 +65,7 @@ type Consumer struct {
 	LineUserID              string `json:"lineUserId"`              // Line UserId
 	ProviderLineAtChannelID string `json:"providerLineAtChannelId"` // Provider Line官方帳號 ChannelID
 	LineFollowingStatus     int    `json:"lineFollowingStatus"`     // Line following status
-	CreatedAt               int    `json:"createdAt"`               // 創建時間
+	CreatedAt               int64  `json:"createdAt"`               // 創建時間
 }
 
 type Feedback struct {
@@ -79,17 +111,18 @@ type Order struct {
 
 type Payment struct {
 	ID              string `json:"_key,omitempty"`  // increment unique key
+	ProviderID      string `json:"providerId"`      // document reference key
 	OrderID         string `json:"orderId"`         // document reference key
 	ConsumerID      string `json:"consumerId"`      // document reference key
 	PaymentMethodID string `json:"paymentMethodId"` // document reference key
-	PaidPrice       int64  `json:"paidPrice"`       // 付款金額
-	PlatformFee     int64  `json:"platformFee"`     // 我們平台所抽的金額
-	PaymentFee      int64  `json:"paymentFee"`      // 金流服務抽成
-	AgentFee        int64  `json:"agentFee"`        // Todo 合作抽成(與廠商合作的分潤)
-	AdFee           int64  `json:"adFee"`           // Todo 業務推廣抽成
-	TaxFee          int64  `json:"taxFee"`          // Todo 勞務報酬報稅
-	NetAmount       int64  `json:"netAmount"`       // 可被發放的金額
-	Status          int    `json:"status"`          // 狀態, 是否成功付款
+	PaidPrice       int32  `json:"paidPrice"`       // 付款金額
+	PlatformFee     int32  `json:"platformFee"`     // 我們平台所抽的金額
+	PaymentFee      int32  `json:"paymentFee"`      // 金流服務抽成
+	AgentFee        int32  `json:"agentFee"`        // Todo 合作抽成(與廠商合作的分潤)
+	AdFee           int32  `json:"adFee"`           // Todo 業務推廣抽成
+	TaxFee          int32  `json:"taxFee"`          // Todo 勞務報酬報稅
+	NetAmount       int32  `json:"netAmount"`       // 可被發放的金額
+	Status          int    `json:"status"`          // 狀態, 是否成功付款, 0 init, 1 process, 2 success, -1 異常
 	RawParams       string `json:"rawParams"`       // 原始參數
 	CreatedAt       int64  `json:"createdAt"`       // 訂單創建時間
 	UpdatedAt       int64  `json:"updatedAt"`       // 更新時間
@@ -101,31 +134,6 @@ type PaymentMethod struct {
 	PaymentType     string `json:"paymentType"`     // 付款方式, 刷卡、超商、ATM轉帳...
 	ServicePlatform string `json:"servicePlatform"` // 金流平台, default 藍新
 	// Todo 看藍新、我們所要支援的種類還有相應的費率
-}
-
-type Provider struct {
-	ID                  string `json:"_key,omitempty"`      // increment unique key
-	LineUserID          string `json:"lineUserId"`          // uniq Line userID (e.g. U123xxxxxxxxdef)
-	RealName            string `json:"realName"`            // 中文姓名(真實)
-	LineAtName          string `json:"lineAtName"`          // 申請Line官方帳號名稱
-	LineAtID            string `json:"lineAtID"`            // 申請Line官方帳號ID(Todo 暫不實作)
-	LineAtChannelID     string `json:"lineAtChannelId"`     // 申請Line官方帳號 ChannelID
-	LineAtChannelSecret string `json:"lineAtChannelSecret"` // 申請Line官方帳號 ChannelSecret
-	LineAtAccessToken   string `json:"lineAtAccessToken"`   // 申請Line官方帳號 AccessToken
-	CountryCode         string `json:"countryCode"`         // 手機國碼(Todo 暫不實作)
-	LineID              string `json:"lineID"`              // 聯絡的個人Line ID
-	PhoneNum            string `json:"phoneNum"`            // 手機號碼
-	ConfirmedPhoneNum   string `json:"confirmedPhoneNum"`   // 認證過的手機號碼(Todo 二階段手機驗證)
-	GmailAddr           string `json:"gamilAddr"`           // Gamil
-	ConfirmedGmailAddr  string `json:"confirmedGmailAddr"`  // 認證過的Gamil(Todo 發認證信)
-	GCalSync            bool   `json:"gCalSync"`            // Google Calendar 授權成功
-	InviteCode          string `json:"inviteCode"`          // 企業用戶，業務推廣碼
-	MemeberTerm         bool   `json:"memeberTerm"`         // 會員條款
-	PrivacyTerm         bool   `json:"privacyTerm"`         // 隱私全條款
-	Status              int    `json:"status"`              // 狀態 0: 暫存, 1: 確認送出, 2: 審核中, 3: 審核完成, 4: 審核不通過, 5: 例外處理
-	CreatedAt           int64  `json:"createdAt"`           // 創建時間
-	Blocked             bool   `json:"bolcked"`             // Todo 停權blocked, 停權處理流程
-	// Todo 應該還有個google calendar 授權成功拿到的token
 }
 
 type Schedule struct {

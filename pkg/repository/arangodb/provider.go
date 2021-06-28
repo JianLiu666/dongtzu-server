@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/arangodb/go-driver"
+	"github.com/google/uuid"
 	"gitlab.geax.io/demeter/gologger/logger"
 )
 
@@ -88,18 +89,34 @@ func CreateProviderProfile(ctx context.Context, registerInfo model.RegisterProvi
 		return err
 	}
 
+	u4 := uuid.New()
+	genSharableCode := u4.String()
+
 	aql := `
 function (Params) {
 	const db = require('@arangodb').db;
 	const providerCol = db._collection("Providers");
-	const savedObj = Params[0];
+	let savedObj = Params[0];
 
-	providerDoc = providerCol.firstExample({lineUserId: savedObj.lineUserId});
+	const providerDoc = providerCol.firstExample({lineUserId: savedObj.lineUserId});
+	const inviterId = "";
+	if (savedObj.inviteCode && savedObj.inviteCode.length > 0) {
+		inviterDoc = providerCol.firstExample({inviteCode: savedObj.inviteCode});
+		inviterId = (inviterDoc && inviterDoc._key) ? inviterDoc._key : "";
+	}
+	if (providerDoc.gmailAddr != savedObj.gmailAddr && savedObj.gToken === "") {
+		savedObj.gCalSync = false;
+		savedObj.guuid = "";
+		savedObj.gToken = "";
+		savedObj.gRawData = "";
+	}
 	if (providerDoc && providerDoc._key && providerDoc._key.length > 0 &&
 		(providerDoc.status === 0 || providerDoc.status === 1)) {
 		providerDoc = {
 			...providerDoc,
 			...savedObj
+			inviterId,
+			sharableCode: Params[1],
 		}
 		providerCol.update({ _key: providerDoc._key }, providerDoc);
 	} else {
@@ -113,7 +130,7 @@ function (Params) {
 		MaxTransactionSize: 100000,
 		WriteCollections:   []string{collectionProviders},
 		ReadCollections:    []string{collectionProviders},
-		Params:             []interface{}{savedMap},
+		Params:             []interface{}{savedMap, genSharableCode},
 		WaitForSync:        false,
 	}
 
@@ -178,6 +195,374 @@ function (Params) {
 	return nil
 }
 
+func GetPaymentsByLineUserID(ctx context.Context, lineUserID string, status int) ([]model.Payment, error) {
+	results := []model.Payment{}
+
+	cursor, err := db.Query(ctx, `
+		LET providerId = (
+			FOR p IN @@CollectionP
+				FILTER p.lineUserId == @valueId
+			RETURN p._key
+		)
+		FOR p IN @@collectionPayments
+			FILTER p.providerId == providerId AND
+				p.status == @valueStatus
+		RETURN p`,
+		map[string]interface{}{
+			"@CollectionP":        collectionProviders,
+			"@collectionPayments": collectionPayments,
+			"valueId":             lineUserID,
+			"valueStatus":         status,
+		})
+
+	defer closeCursor(cursor)
+	if err != nil {
+		logger.Errorf("[ArangoDB][GetPaymentsByLineUserID] failed to query: %v", err)
+		return results, err
+	}
+
+	for {
+		var doc model.Payment
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			logger.Errorf("[ArangoDB][GetPaymentsByLineUserID] failed to read doc: %v", err)
+			return results, err
+		}
+
+		results = append(results, doc)
+	}
+
+	return results, nil
+}
+
+func GetMonthReceiptByLineUserID(ctx context.Context, lineUserID string) ([]model.MonthReceipt, error) {
+	results := []model.MonthReceipt{}
+	now := time.Now()
+	lastDayOfTwoMonthAgo := now.AddDate(0, -2, -now.Day())
+
+	cursor, err := db.Query(ctx, `
+		LET providerId = (
+			FOR p IN @@CollectionP
+				FILTER p.lineUserId == @valueId
+			RETURN p._key
+		)
+		FOR m IN @@CollectionM
+			FILTER m.providerId == providerId AND
+				m.clearingStartedAt >= @valueStart
+		RETURN m`,
+		map[string]interface{}{
+			"@CollectionP": collectionProviders,
+			"@CollectionM": collectionMonthReceipts,
+			"valueId":      lineUserID,
+			"valueStart":   lastDayOfTwoMonthAgo,
+		})
+
+	defer closeCursor(cursor)
+	if err != nil {
+		logger.Errorf("[ArangoDB][GetMonthReceiptByLineUserID] failed to query: %v", err)
+		return results, err
+	}
+
+	for {
+		var doc model.MonthReceipt
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			logger.Errorf("[ArangoDB][GetMonthReceiptByLineUserID] failed to read doc: %v", err)
+			return results, err
+		}
+
+		results = append(results, doc)
+	}
+
+	return results, nil
+}
+
+func GetScheduleByLineUserID(ctx context.Context, lineUserID string) ([]model.ScheduleCourse, error) {
+	results := []model.ScheduleCourse{}
+	weekAgoFromNow := time.Now().AddDate(0, 0, -7)
+	// weekAfterFromNow := time.Now().AddDate(0, 0, 7)
+	weekAgoTimestamp := int64(time.Nanosecond) * weekAgoFromNow.UnixNano() / int64(time.Millisecond)
+	// weekAfterTimestamp := int64(time.Nanosecond) * weekAfterFromNow.UnixNano() / int64(time.Millisecond)
+
+	cursor, err := db.Query(ctx, `
+		LET providerId = (
+			FOR p IN @@CollectionP
+				FILTER p.lineUserId == @valueId
+			RETURN p._key
+		)
+		FOR s IN @@CollectionS
+			FILTER s.providerId == providerId AND
+				s.CourseStartAt >= @valueStart
+			LET c = (
+				FOR c IN @@CollectionC
+					FILTER c._key == s.courseId
+				RETURN c
+			)
+		RETURN MERGE(s, {title: c[0].title, content: c[0].content})`,
+		map[string]interface{}{
+			"@CollectionP": collectionProviders,
+			"@CollectionS": collectionSchedules,
+			"@CollectionC": collectionCourses,
+			"valueId":      lineUserID,
+			"valueStart":   weekAgoTimestamp,
+		})
+
+	defer closeCursor(cursor)
+	if err != nil {
+		logger.Errorf("[ArangoDB][GetScheduleByLineUserID] failed to query: %v", err)
+		return results, err
+	}
+
+	for {
+		var doc model.ScheduleCourse
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			logger.Errorf("[ArangoDB][GetScheduleByLineUserID] failed to read doc: %v", err)
+			return results, err
+		}
+
+		results = append(results, doc)
+	}
+
+	return results, nil
+}
+
+func GetAppointmentsByLineUserID(ctx context.Context, lineUserID string) ([]model.Appointment, error) {
+	results := []model.Appointment{}
+	weekAgoFromNow := time.Now().AddDate(0, 0, -7)
+	// weekAfterFromNow := time.Now().AddDate(0, 0, 7)
+	weekAgoTimestamp := int64(time.Nanosecond) * weekAgoFromNow.UnixNano() / int64(time.Millisecond)
+	// weekAfterTimestamp := int64(time.Nanosecond) * weekAfterFromNow.UnixNano() / int64(time.Millisecond)
+
+	cursor, err := db.Query(ctx, `
+		LET providerId = (
+			FOR p IN @@CollectionP
+				FILTER p.lineUserId == @valueId
+			RETURN p._key
+		)
+		FOR a IN @@CollectionA
+			FILTER a.providerId == providerId AND
+				a.CourseStartAt >= @valueStart AND
+				a.Status != @valueStatus
+		RETURN a`,
+		map[string]interface{}{
+			"@CollectionP": collectionProviders,
+			"@CollectionA": collectionAppointments,
+			"valueId":      lineUserID,
+			"valueStart":   weekAgoTimestamp,
+			"valueStatus":  -1,
+		})
+
+	defer closeCursor(cursor)
+	if err != nil {
+		logger.Errorf("[ArangoDB][GetAppointmentsByLineUserID] failed to query: %v", err)
+		return results, err
+	}
+
+	for {
+		var doc model.Appointment
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			logger.Errorf("[ArangoDB][GetAppointmentsByLineUserID] failed to read doc: %v", err)
+			return results, err
+		}
+
+		results = append(results, doc)
+	}
+
+	return results, nil
+}
+
+func GetMonthReceiptList(ctx context.Context, lineUserID string) ([]model.MonthReceipt, error) {
+	results := []model.MonthReceipt{}
+
+	cursor, err := db.Query(ctx, `
+		LET providerId = (
+			FOR p IN @@CollectionP
+				FILTER p.lineUserId == @valueId
+			RETURN p._key
+		)
+		FOR m IN @@collectionMonthReceipts
+			FILTER m.providerId == providerId
+		RETURN m`,
+		map[string]interface{}{
+			"@CollectionP":             collectionProviders,
+			"@collectionMonthReceipts": collectionMonthReceipts,
+			"valueId":                  lineUserID,
+		})
+
+	defer closeCursor(cursor)
+	if err != nil {
+		logger.Errorf("[ArangoDB][GetMonthReceiptList] failed to query: %v", err)
+		return results, err
+	}
+
+	for {
+		var doc model.MonthReceipt
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			logger.Errorf("[ArangoDB][GetMonthReceiptList] failed to read doc: %v", err)
+			return results, err
+		}
+
+		results = append(results, doc)
+	}
+
+	return results, nil
+}
+
+func GetServiceProductsByLineUserID(ctx context.Context, lineUserID string) ([]model.ServiceProduct, error) {
+	results := []model.ServiceProduct{}
+
+	cursor, err := db.Query(ctx, `
+		LET providerId = (
+			FOR p IN @@CollectionP
+				FILTER p.lineUserId == @valueId
+			RETURN p._key
+		)
+		FOR s IN @@collectionServiceProducts
+			FILTER s.providerId == providerId AND
+			(IS_NULL(s.deletedAt) OR s.deletedAt == 0)
+		RETURN s`,
+		map[string]interface{}{
+			"@CollectionP":               collectionProviders,
+			"@collectionServiceProducts": collectionServiceProducts,
+			"valueId":                    lineUserID,
+		})
+
+	defer closeCursor(cursor)
+	if err != nil {
+		logger.Errorf("[ArangoDB][GetServiceProductsByLineUserID] failed to query: %v", err)
+		return results, err
+	}
+
+	for {
+		var doc model.ServiceProduct
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			logger.Errorf("[ArangoDB][GetServiceProductsByLineUserID] failed to read doc: %v", err)
+			return results, err
+		}
+
+		results = append(results, doc)
+	}
+
+	return results, nil
+}
+
+func CreateOrUpdateServiceProduct(ctx context.Context, lineUserID string,
+	params model.CreateOrUpdateServiceProductsReq) error {
+	savedMapList, err := formatServiceProductMapList(params.ReqList)
+	if err != nil {
+		return err
+	}
+
+	aql := `
+function (Params) {
+	const db = require('@arangodb').db;
+	const providerCol = db._collection("Providers");
+	const svcProductsCol = db._collection("ServiceProducts");
+	const lineUserId = Params[0];
+	const savedObjList = Params[1];
+
+	providerDoc = providerCol.firstExample({lineUserId: lineUserId});
+	if (!(providerDoc && providerDoc._key && providerDoc._key.length > 0 &&
+		(providerDoc.status >= 3))) {
+		return 2;
+	}
+
+	if (savedObjList.length == 0) {
+		return 1;
+	}
+
+	savedObjList.forEach(function(obj) {
+		const keyExist = obj._key && obj._key.length > 0;
+		if (keyExist) {
+			svcProductsCol.update({ _key: obj._key }, obj);
+		} else {
+			svcProductsCol.save(obj);
+		}
+	})
+
+	return 1;
+}
+`
+	options := &driver.TransactionOptions{
+		MaxTransactionSize: 100000,
+		WriteCollections:   []string{collectionProviders, collectionServiceProducts},
+		ReadCollections:    []string{collectionProviders, collectionServiceProducts},
+		Params:             []interface{}{lineUserID, savedMapList},
+		WaitForSync:        false,
+	}
+
+	resCode, err := db.Transaction(ctx, aql, options)
+	if err != nil {
+		logger.Errorf("CreateOrUpdateServiceProduct TX execution failure")
+		return err
+	}
+	if resCode == 2 {
+		return errors.New("Not found document")
+	}
+
+	logger.Debugf("CreateOrUpdateServiceProduct TX execution resCode is : %v", resCode)
+
+	return nil
+}
+
+func GetScheduleList(ctx context.Context, lineUserID string, start int64) ([]model.Schedule, error) {
+	results := []model.Schedule{}
+
+	cursor, err := db.Query(ctx, `
+		LET providerId = (
+			FOR p IN @@CollectionP
+				FILTER p.lineUserId == @valueId
+			RETURN p._key
+		)
+		FOR s IN @@collectionSchedules
+			FILTER s.providerId == providerId AND
+			s.courseStartAt >= @valueStart
+		RETURN s`,
+		map[string]interface{}{
+			"@CollectionP":         collectionProviders,
+			"@collectionSchedules": collectionSchedules,
+			"valueId":              lineUserID,
+			"valueStart":           start,
+		})
+
+	defer closeCursor(cursor)
+	if err != nil {
+		logger.Errorf("[ArangoDB][GetScheduleList] failed to query: %v", err)
+		return results, err
+	}
+
+	for {
+		var doc model.Schedule
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			logger.Errorf("[ArangoDB][GetScheduleList] failed to read doc: %v", err)
+			return results, err
+		}
+
+		results = append(results, doc)
+	}
+
+	return results, nil
+}
+
 /**
  * Private methods
  */
@@ -202,7 +587,8 @@ func formatCreateProviderMap(registerInfo model.RegisterProviderReq) (map[string
 		GmailAddr:           registerInfo.GmailAddr,
 		ConfirmedGmailAddr:  registerInfo.GmailAddr,
 		GCalSync:            false,
-		InviteCode:          registerInfo.InivteCode,
+		InviteCode:          registerInfo.InviteCode,
+		SharableCode:        "",
 		MemeberTerm:         false,
 		PrivacyTerm:         false,
 		Status:              registerInfo.Status,
@@ -225,6 +611,9 @@ func formatUpdateProviderMap(providerInfo model.UpdateProviderInfoReq) (map[stri
 		PhoneNum:           providerInfo.PhoneNum,
 		ConfirmedPhoneNum:  providerInfo.PhoneNum,
 		GmailAddr:          providerInfo.GmailAddr,
+		GUUID:              providerInfo.GUUID,
+		GToken:             providerInfo.GToken,
+		GRawData:           providerInfo.GRawData,
 		ConfirmedGmailAddr: providerInfo.GmailAddr,
 		Status:             providerInfo.Status,
 	}
@@ -235,13 +624,23 @@ func formatUpdateProviderMap(providerInfo model.UpdateProviderInfoReq) (map[stri
 	delete(dataMap, "lineAtChannelId")
 	delete(dataMap, "lineAtChannelSecret")
 	delete(dataMap, "lineAtAccessToken")
-	delete(dataMap, "gCalSync")
 	delete(dataMap, "inviteCode")
+	delete(dataMap, "inviterId")
+	delete(dataMap, "sharableCode")
 	if providerInfo.Status != constant.Provider_Status_Auditing {
 		delete(dataMap, "memeberTerm")
 		delete(dataMap, "privacyTerm")
 	}
 	delete(dataMap, "createdAt")
+	if providerInfo.GToken == "" {
+		delete(dataMap, "guuid")
+		delete(dataMap, "gToken")
+		delete(dataMap, "gRawData")
+	}
 
 	return dataMap, nil
+}
+
+func formatServiceProductMapList(params []model.SvcProduct) (map[string]interface{}, error) {
+
 }
