@@ -9,3 +9,13 @@ services:
       - 8529:8529
     volumes:
       - "./arangodb/data:/var/lib/arangodb3"
+
+  server:
+    image: dongtzu-server:lastest
+    container_name: server
+    ports:
+      - 4000:4000
+    # volumes: 
+    #   - "./server/conf:/app/conf"
+    depends_on:
+      - arangodb
