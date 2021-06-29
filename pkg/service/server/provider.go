@@ -374,7 +374,12 @@ func createServiceSchedule() fiber.Handler {
 				Message:    "No given Line user ID",
 			})
 		}
+
 		// Todo
+		// 1. body parser
+		// 2. create single schedule
+		//    - check if the schedule is conflict
+		//    - create the schedule
 		return nil
 	}
 }
@@ -390,7 +395,13 @@ func createScheduleRule() fiber.Handler {
 				Message:    "No given Line user ID",
 			})
 		}
+
 		// Todo
+		// 1. body parser
+		// 2. create single schedule
+		//    - check if the schedule rule is conflict
+		//    - create the schedule rule
+
 		return nil
 	}
 }

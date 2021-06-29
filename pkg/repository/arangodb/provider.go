@@ -464,10 +464,6 @@ func GetServiceProductsByLineUserID(ctx context.Context, lineUserID string) ([]m
 
 func CreateOrUpdateServiceProduct(ctx context.Context, lineUserID string,
 	params model.CreateOrUpdateServiceProductsReq) error {
-	savedMapList, err := formatServiceProductMapList(params.ReqList)
-	if err != nil {
-		return err
-	}
 
 	aql := `
 function (Params) {
@@ -503,7 +499,7 @@ function (Params) {
 		MaxTransactionSize: 100000,
 		WriteCollections:   []string{collectionProviders, collectionServiceProducts},
 		ReadCollections:    []string{collectionProviders, collectionServiceProducts},
-		Params:             []interface{}{lineUserID, savedMapList},
+		Params:             []interface{}{lineUserID, params.ReqList},
 		WaitForSync:        false,
 	}
 
@@ -639,8 +635,4 @@ func formatUpdateProviderMap(providerInfo model.UpdateProviderInfoReq) (map[stri
 	}
 
 	return dataMap, nil
-}
-
-func formatServiceProductMapList(params []model.SvcProduct) (map[string]interface{}, error) {
-	return nil, nil
 }
