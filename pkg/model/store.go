@@ -21,10 +21,12 @@ type Appointment struct {
 }
 
 type Course struct {
-	ID        string `json:"_key,omitempty"` // increment unique key
-	SchduleID string `json:"scheduleId"`     // document reference key
-	Title     string `json:"title"`          // 課程標題
-	Content   string `json:"content"`        // 課程內容
+	ID             string `json:"_key,omitempty"` // increment unique key
+	ProviderID     string `json:"providerId"`     // document reference key
+	SchduleID      string `json:"scheduleId"`     // document reference key
+	ScheduleRuleID string `json:"scheduleRuleId"` // document reference key
+	Title          string `json:"title"`          // 課程標題
+	Content        string `json:"content"`        // 課程內容
 	// Todo
 	// Tag ...
 }
@@ -165,6 +167,9 @@ type ScheduleRule struct {
 	CycleDiffAmount     int    `json:"cycleDiff"`           // 週期間隔數量
 	CycleDiffUnit       int    `json:"cycleDiff"`           // 週期間隔單位(天、週、月、年)
 	CycleEndType        int    `json:"cycleEndType"`        // 結束類型：0幾次、1時間、2永遠不停
+	MinConsumerLimit    int    `json:"minConsumerLimit"`    // 最小開課人數下限
+	MaxConsumerLimit    int    `json:"maxConsumerLimit"`    // 最大開課人數上限
+	Count               int    `json:"count"`               // 目前參加人數
 }
 
 type ServiceProduct struct {

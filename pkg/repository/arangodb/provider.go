@@ -559,6 +559,58 @@ func GetScheduleList(ctx context.Context, lineUserID string, start int64) ([]mod
 	return results, nil
 }
 
+func CreateProviderSchedule(ctx context.Context, lineUserID string,
+	params model.CreateServiceScheduleReq) error {
+
+	aql := `
+function (Params) {
+	const db = require('@arangodb').db;
+	const providerCol = db._collection("Providers");
+	const courseCol = db._collection("Courses");
+	const scheduleCol = db._collection("Schedules");
+	const lineId = Params[0];
+	const savedObj = Params[1];
+
+	const courseRes = courseCol.save({
+		providerId: lineId,
+		title: savedObj.title,
+		content: savedObj.content
+	});
+
+	const scheduleRes = scheduleCol.save({
+		courseId: courseRes._key,
+		providerId: lineId,
+		cousreStartAt: savedObj.cousreStartAt,
+		courseEndAt: savedObj.courseEndAt,
+		minConsumerLimit: savedObj.minConsumerLimit,
+		maxConsumerLimit: savedObj.maxConsumerLimit,
+		count: savedObj.count
+	});
+
+	courseCol.update({_key: courseRes._key}, {scheduleId: scheduleRes._key})
+
+	return 1;
+}
+`
+	options := &driver.TransactionOptions{
+		MaxTransactionSize: 100000,
+		WriteCollections:   []string{collectionProviders, collectionSchedules, collectionCourses},
+		ReadCollections:    []string{collectionProviders, collectionSchedules, collectionCourses},
+		Params:             []interface{}{lineUserID, params},
+		WaitForSync:        false,
+	}
+
+	resCode, err := db.Transaction(ctx, aql, options)
+	if err != nil {
+		logger.Errorf("CreateProviderSchedule TX execution failure")
+		return err
+	}
+
+	logger.Debugf("CreateProviderSchedule TX execution resCode is : %v", resCode)
+
+	return nil
+}
+
 /**
  * Private methods
  */

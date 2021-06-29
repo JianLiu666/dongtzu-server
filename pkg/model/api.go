@@ -108,3 +108,29 @@ type ProviderScheduleListRes struct {
 	Data       []Schedule `json:"data"`
 	Meta       Pagination `json:"meta"`
 }
+
+type CreateServiceScheduleReq struct {
+	CourseStartAt    int64  `json:"courseStartAt"`    // 課程開始時間
+	CourseEndAt      int64  `json:"courseEndAt"`      // 課程結束時間
+	MinConsumerLimit int    `json:"minConsumerLimit"` // 最小開課人數下限
+	MaxConsumerLimit int    `json:"maxConsumerLimit"` // 最大開課人數上限
+	Count            int    `json:"count"`            // 目前參加人數
+	Title            string `json:"title"`            // 課程標題
+	Content          string `json:"content"`          // 課程內容
+}
+
+type CreateServiceScheduleRuleReq struct {
+	CourseStartAt       int64  `json:"courseStartAt"`       // 課程開始時間
+	CourseEndAt         int64  `json:"courseEndAt"`         // 課程結束時間
+	CycleStartAt        int64  `json:"cycleStartAt"`        // 週期開始時間
+	CycleEndAt          int64  `json:"cycleEndAt"`          // 週期結束時間 -> 配合結束類型看
+	CycleRepeatedAmount int    `json:"cycleRepeatedAmount"` // 搭配週期間隔數量、單位看
+	CycleDiffAmount     int    `json:"cycleDiff"`           // 週期間隔數量
+	CycleDiffUnit       int    `json:"cycleDiff"`           // 週期間隔單位(天、週、月、年)
+	CycleEndType        int    `json:"cycleEndType"`        // 結束類型：0幾次、1時間、2永遠不停
+	MinConsumerLimit    int    `json:"minConsumerLimit"`    // 最小開課人數下限
+	MaxConsumerLimit    int    `json:"maxConsumerLimit"`    // 最大開課人數上限
+	Count               int    `json:"count"`               // 目前參加人數
+	Title               string `json:"title"`               // 課程標題
+	Content             string `json:"content"`             // 課程內容
+}

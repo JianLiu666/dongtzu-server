@@ -363,7 +363,7 @@ func getProviderSchedule() fiber.Handler {
 	}
 }
 
-// 創建當堂課程
+// 創建單堂預約
 func createServiceSchedule() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		lineUserID := c.Params("lineUserId")
@@ -375,12 +375,28 @@ func createServiceSchedule() fiber.Handler {
 			})
 		}
 
-		// Todo
-		// 1. body parser
-		// 2. create single schedule
-		//    - check if the schedule is conflict
-		//    - create the schedule
-		return nil
+		var body model.CreateServiceScheduleReq
+		if err := c.BodyParser(&body); err != nil {
+			return c.Status(fasthttp.StatusNotFound).JSON(model.ErrRes{
+				Code:       "404001",
+				StatusCode: "404001",
+				Message:    "No validate edit provider input",
+			})
+		}
+
+		ctx := context.Background()
+		err := arangodb.CreateProviderSchedule(ctx, lineUserID, body)
+		if err != nil {
+			return c.Status(fasthttp.StatusInternalServerError).JSON(model.ErrRes{
+				Code:       "500001",
+				StatusCode: "500001",
+				Message:    "SERVER_ERROR",
+			})
+		}
+
+		return c.Status(fasthttp.StatusOK).JSON(model.CreateUpdateDeleteRes{
+			StatusCode: "200001",
+		})
 	}
 }
 
