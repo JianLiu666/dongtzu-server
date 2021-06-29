@@ -412,13 +412,31 @@ func createScheduleRule() fiber.Handler {
 			})
 		}
 
-		// Todo
-		// 1. body parser
-		// 2. create single schedule
-		//    - check if the schedule rule is conflict
-		//    - create the schedule rule
+		var body model.CreateServiceScheduleRuleReq
+		if err := c.BodyParser(&body); err != nil {
+			return c.Status(fasthttp.StatusNotFound).JSON(model.ErrRes{
+				Code:       "404001",
+				StatusCode: "404001",
+				Message:    "No validate edit provider input",
+			})
+		}
 
-		return nil
+		ctx := context.Background()
+		err := arangodb.CreateProviderScheduleRule(ctx, lineUserID, body)
+		if err != nil {
+			return c.Status(fasthttp.StatusInternalServerError).JSON(model.ErrRes{
+				Code:       "500001",
+				StatusCode: "500001",
+				Message:    "SERVER_ERROR",
+			})
+		}
+
+		// Todo
+		// Tigger service 按照週期規則建立schedule
+
+		return c.Status(fasthttp.StatusOK).JSON(model.CreateUpdateDeleteRes{
+			StatusCode: "200001",
+		})
 	}
 }
 
@@ -433,13 +451,41 @@ func deleteServiceSchedule() fiber.Handler {
 			})
 		}
 
-		// Todo
-		// 1. query parser
-		//    - 刪除未來所有規則與否
-		// 2. delete schedule by lineUserId & schedule id
-		// 3. if the query need to delete all -> svc invoke delete action
+		scheduleId := c.Params("scheduleId")
+		if scheduleId == "" {
+			return c.Status(fasthttp.StatusNotFound).JSON(model.ErrRes{
+				Code:       "404001",
+				StatusCode: "404001",
+				Message:    "No given Line user ID",
+			})
+		}
 
-		return nil
+		queryIncludeRule := c.Query("includeRule", "")
+		var includeRule bool
+		if queryIncludeRule == "" || queryIncludeRule == "false" {
+			includeRule = false
+		} else {
+			includeRule = true
+		}
+
+		ctx := context.Background()
+		err := arangodb.DeleteProviderSchedule(ctx, lineUserID, scheduleId)
+		if err != nil {
+			return c.Status(fasthttp.StatusInternalServerError).JSON(model.ErrRes{
+				Code:       "500001",
+				StatusCode: "500001",
+				Message:    "SERVER_ERROR",
+			})
+		}
+
+		if includeRule {
+			// Todo
+			// Tigger service 按照週期規則刪除schedule
+		}
+
+		return c.Status(fasthttp.StatusOK).JSON(model.CreateUpdateDeleteRes{
+			StatusCode: "200001",
+		})
 	}
 }
 

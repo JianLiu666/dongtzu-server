@@ -24,6 +24,7 @@ const (
 	collectionPaymentMethods  = "PaymentMethods"
 	collectionProviders       = "Providers"
 	collectionSchedules       = "Schedules"
+	collectionScheduleRules   = "ScheduleRules"
 	collectionServiceProducts = "ServiceProducts"
 	collectionZoomAccounts    = "ZoomAccounts"
 )

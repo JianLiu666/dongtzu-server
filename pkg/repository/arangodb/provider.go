@@ -571,15 +571,16 @@ function (Params) {
 	const lineId = Params[0];
 	const savedObj = Params[1];
 
+	const providerDoc = providerCol.firstExample({lineUserId: lineId});
 	const courseRes = courseCol.save({
-		providerId: lineId,
+		providerId: providerDoc._key,
 		title: savedObj.title,
 		content: savedObj.content
 	});
 
 	const scheduleRes = scheduleCol.save({
 		courseId: courseRes._key,
-		providerId: lineId,
+		providerId: providerDoc._key,
 		cousreStartAt: savedObj.cousreStartAt,
 		courseEndAt: savedObj.courseEndAt,
 		minConsumerLimit: savedObj.minConsumerLimit,
@@ -607,6 +608,106 @@ function (Params) {
 	}
 
 	logger.Debugf("CreateProviderSchedule TX execution resCode is : %v", resCode)
+
+	return nil
+}
+
+func CreateProviderScheduleRule(ctx context.Context, lineUserID string,
+	params model.CreateServiceScheduleRuleReq) error {
+
+	aql := `
+function (Params) {
+	const db = require('@arangodb').db;
+	const providerCol = db._collection("Providers");
+	const courseCol = db._collection("Courses");
+	const scheduleRuleCol = db._collection("ScheduleRules");
+	const lineId = Params[0];
+	const savedObj = Params[1];
+
+	const providerDoc = providerCol.firstExample({lineUserId: lineId});
+	const courseRes = courseCol.save({
+		providerId: providerDoc._key,
+		title: savedObj.title,
+		content: savedObj.content
+	});
+
+	const scheduleRuleRes = scheduleRuleCol.save({
+		providerId: providerDoc._key,
+		courseStartAt: savedObj.courseStartAt,
+		courseEndAt: savedObj.courseEndAt,
+		cycleStartAt: savedObj.cycleStartAt,
+		cycleEndAt: savedObj.cycleEndAt,
+		cycleRepeatedAmount: savedObj.cycleRepeatedAmount,
+		cycleDiffAmount: savedObj.cycleDiffAmount,
+		cycleDiffUnit: savedObj.cycleDiffUnit,
+		cycleEndType: savedObj.cycleEndType,
+		minConsumerLimit: savedObj.minConsumerLimit,
+		maxConsumerLimit: savedObj.maxConsumerLimit,
+		count: savedObj.count,
+	});
+
+	courseCol.update({_key: courseRes._key}, {scheduleRuleId: scheduleRuleRes._key})
+
+	return 1;
+}
+`
+
+	options := &driver.TransactionOptions{
+		MaxTransactionSize: 100000,
+		WriteCollections:   []string{collectionProviders, collectionScheduleRules, collectionCourses},
+		ReadCollections:    []string{collectionProviders, collectionScheduleRules, collectionCourses},
+		Params:             []interface{}{lineUserID, params},
+		WaitForSync:        false,
+	}
+
+	resCode, err := db.Transaction(ctx, aql, options)
+	if err != nil {
+		logger.Errorf("CreateProviderScheduleRule TX execution failure")
+		return err
+	}
+
+	logger.Debugf("CreateProviderScheduleRule TX execution resCode is : %v", resCode)
+
+	return nil
+}
+
+func DeleteProviderSchedule(ctx context.Context, lineUserID, scheduleId string) error {
+
+	aql := `
+function (Params) {
+	const db = require('@arangodb').db;
+	const providerCol = db._collection("Providers");
+	const scheduleCol = db._collection("Schedules");
+	const lineId = Params[0];
+	const scheduleId = Params[1];
+	const providerDoc = providerCol.firstExample({lineUserId: lineId});
+	const scheduleDoc = scheduleCol.firstExample({_key: scheduleId});
+	if (providerDoc._key !== scheduleDoc.providerId) {
+		return 2;
+	}
+	scheduleCol.remove(scheduleDoc._key)
+
+	return 1;
+}
+`
+	options := &driver.TransactionOptions{
+		MaxTransactionSize: 100000,
+		WriteCollections:   []string{collectionProviders, collectionSchedules},
+		ReadCollections:    []string{collectionProviders, collectionSchedules},
+		Params:             []interface{}{lineUserID, scheduleId},
+		WaitForSync:        false,
+	}
+
+	resCode, err := db.Transaction(ctx, aql, options)
+	if err != nil {
+		logger.Errorf("DeleteProviderSchedule TX execution failure")
+		return err
+	}
+	if resCode == 2 {
+		return errors.New("Not found document")
+	}
+
+	logger.Debugf("DeleteProviderSchedule TX execution resCode is : %v", resCode)
 
 	return nil
 }
