@@ -422,6 +422,27 @@ func createScheduleRule() fiber.Handler {
 	}
 }
 
+func deleteServiceSchedule() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		lineUserID := c.Params("lineUserId")
+		if lineUserID == "" {
+			return c.Status(fasthttp.StatusNotFound).JSON(model.ErrRes{
+				Code:       "404001",
+				StatusCode: "404001",
+				Message:    "No given Line user ID",
+			})
+		}
+
+		// Todo
+		// 1. query parser
+		//    - 刪除未來所有規則與否
+		// 2. delete schedule by lineUserId & schedule id
+		// 3. if the query need to delete all -> svc invoke delete action
+
+		return nil
+	}
+}
+
 /**
  * format method
  */

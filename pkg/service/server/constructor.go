@@ -39,9 +39,10 @@ func Init() {
 	dt.Get("/providers/:lineUserId/monthReceipts", getMonthReceipts())
 	dt.Get("/providers/:lineUserId/serviceProducts", getProviderServiceProducts())
 	dt.Post("/providers/:lineUserId/serviceProducts", createOrUpdateProviderServiceProduct())
-	dt.Get("/providers/:lineUserId/serviceSchedule", getProviderSchedule())    // 拿未來兩個月的班表
-	dt.Post("/providers/:lineUserId/serviceSchedule", createServiceSchedule()) // 單堂時間建立
-	dt.Post("/providers/:lineUserId/scheduleRule", createScheduleRule())       // 建立規則
+	dt.Get("/providers/:lineUserId/serviceSchedule", getProviderSchedule())                  // 拿未來兩個月的班表
+	dt.Post("/providers/:lineUserId/serviceSchedule", createServiceSchedule())               // 單堂時間建立
+	dt.Post("/providers/:lineUserId/scheduleRule", createScheduleRule())                     // 建立規則
+	dt.Delete("/providers/:lineUserId/serviceSchedule/:scheduleId", deleteServiceSchedule()) // 刪除預約
 }
 
 func Start() {
