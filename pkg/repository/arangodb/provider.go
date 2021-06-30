@@ -585,7 +585,7 @@ function (Params) {
 		courseEndAt: savedObj.courseEndAt,
 		minConsumerLimit: savedObj.minConsumerLimit,
 		maxConsumerLimit: savedObj.maxConsumerLimit,
-		count: savedObj.count
+		count: 0
 	});
 
 	courseCol.update({_key: courseRes._key}, {scheduleId: scheduleRes._key})
@@ -643,7 +643,7 @@ function (Params) {
 		cycleEndType: savedObj.cycleEndType,
 		minConsumerLimit: savedObj.minConsumerLimit,
 		maxConsumerLimit: savedObj.maxConsumerLimit,
-		count: savedObj.count,
+		count: 0,
 	});
 
 	courseCol.update({_key: courseRes._key}, {scheduleRuleId: scheduleRuleRes._key})

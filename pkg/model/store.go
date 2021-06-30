@@ -151,22 +151,31 @@ type Schedule struct {
 	MeetingUrl       string `json:"meetingUrl"`       // 視訊平台連結
 }
 
-// CycleRepeatedPattern
+// CycleRepeatedAmount
 // 如果是間隔每天 -> 紀錄0
 // 如果是間隔每週 -> 紀錄每個星期幾(1 - 7)禮拜一到禮拜日 -> 先實作這個就好
 // 如果是間隔每月 -> 紀錄1 - 31 (每個月的第幾天)
 // 如果是間隔每年 -> 紀錄0
+// e.g. 每週禮拜五 7/2 10 - 11 am 開出一堂預約 開到11月3號結束
+// courseStartAt : "10:00"
+// courseEndAt : "11:00"
+// cycleStartAt : timestamp 7/2 10:00
+// cycleEndAt : timestamp 11/3 10:00
+// cycleEndType : -1
+// cycleRepeatedAmount : 5
+// cycleDiffAmount : 1
+// cycleDiffUnit : 1
 type ScheduleRule struct {
 	ID                  string `json:"_key,omitempty"`      // increment unique key
 	ProviderID          string `json:"providerId"`          // document reference key
-	CourseStartAt       int64  `json:"courseStartAt"`       // 課程開始時間
-	CourseEndAt         int64  `json:"courseEndAt"`         // 課程結束時間
+	CourseStartAt       int64  `json:"courseStartAt"`       // 課程開始時間 // Todo string HH:MM
+	CourseEndAt         int64  `json:"courseEndAt"`         // 課程結束時間 // Todo string HH:MM
 	CycleStartAt        int64  `json:"cycleStartAt"`        // 週期開始時間
 	CycleEndAt          int64  `json:"cycleEndAt"`          // 週期結束時間 -> 配合結束類型看
-	CycleRepeatedAmount int    `json:"cycleRepeatedAmount"` // 搭配週期間隔數量、單位看
-	CycleDiffAmount     int    `json:"cycleDiff"`           // 週期間隔數量
-	CycleDiffUnit       int    `json:"cycleDiff"`           // 週期間隔單位(天、週、月、年)
-	CycleEndType        int    `json:"cycleEndType"`        // 結束類型：0幾次、1時間、2永遠不停
+	CycleRepeatedAmount int    `json:"cycleRepeatedAmount"` // 搭配週期間隔數量、單位看 3(每個禮拜三)
+	CycleDiffAmount     int    `json:"cycleDiffAmount"`     // 週期間隔數量 1
+	CycleDiffUnit       int    `json:"cycleDiffUnit"`       // 週期間隔單位(0-天、1-週、2-月、3-年)
+	CycleEndType        int    `json:"cycleEndType"`        // 結束類型：1幾次、-1時間、-2永遠不停
 	MinConsumerLimit    int    `json:"minConsumerLimit"`    // 最小開課人數下限
 	MaxConsumerLimit    int    `json:"maxConsumerLimit"`    // 最大開課人數上限
 	Count               int    `json:"count"`               // 目前參加人數
