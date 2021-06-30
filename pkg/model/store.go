@@ -23,7 +23,7 @@ type Appointment struct {
 type Course struct {
 	ID             string `json:"_key,omitempty"` // increment unique key
 	ProviderID     string `json:"providerId"`     // document reference key
-	SchduleID      string `json:"scheduleId"`     // document reference key
+	ScheduleID     string `json:"scheduleId"`     // document reference key
 	ScheduleRuleID string `json:"scheduleRuleId"` // document reference key
 	Title          string `json:"title"`          // 課程標題
 	Content        string `json:"content"`        // 課程內容
@@ -72,30 +72,30 @@ type Consumer struct {
 
 type Feedback struct {
 	ID            string `json:"_key,omitempty"` // increment unique key
-	SchduleID     string `json:"scheduleId"`     // document reference key
+	ScheduleID    string `json:"scheduleId"`     // document reference key
 	AppointmentID string `json:"appointmentId"`  // document reference key
 	Title         string `json:"title"`          // 回饋標題
 	Content       string `json:"content"`        // 回饋內容
 }
 
 type MonthReceipt struct {
-	ID                string `json:"_key,omitempty"`         // increment unique key
-	ProviderID        string `json:"providerId"`             // document reference key
-	RawTotalIncome    int32  `json:"rawTotalIncome"`         // 原始收入總額
-	RemittedAmount    int32  `json:"remittedAmount"`         // 退款金額
-	PlatformRate      int32  `json:"platformRate"`           // 抽成比例
-	PlatformFee       int32  `json:"platformFee"`            // 抽成總額
-	MarketingFee      int32  `json:"marketingFee"`           // Todo 相關行銷分潤總和
-	IncomeGatewayFee  int32  `json:"totalIncomeGatewayFee"`  // 第三方金流收款時所抽取之總額
-	OutcomeGatewayFee int32  `json:"totalOutcomeGatewayFee"` // 第三方金流放款時所抽取之總額
-	TaxFee            int32  `json:"taxFee"`                 // Todo 扣掉相關國家稅務
-	NetIncome         int32  `json:"netIncome"`              // 老師到帳淨收入
-	Notes             string `json:"notes"`                  // 相關備註
-	Paid              bool   `json:"paid"`                   // 是否放完款項
-	ClearingStartedAt int64  `json:"clearingStartedAt"`      // 結算起始時間
-	CreatedAt         int64  `json:"createdAt"`              // 創建時間
-	UpdatedAt         int64  `json:"updatedAt"`              // 更新時間
-	PaidAt            int64  `json:"paidAt"`                 // 放款時間
+	ID                     string `json:"_key,omitempty"`         // increment unique key
+	ProviderID             string `json:"providerId"`             // document reference key
+	RawTotalIncome         int32  `json:"rawTotalIncome"`         // 原始收入總額
+	RemittedAmount         int32  `json:"remittedAmount"`         // 退款金額
+	PlatformRate           int32  `json:"platformRate"`           // 抽成比例
+	PlatformFee            int32  `json:"platformFee"`            // 抽成總額
+	MarketingFee           int32  `json:"marketingFee"`           // Todo 相關行銷分潤總和
+	TotalIncomeGatewayFee  int32  `json:"totalIncomeGatewayFee"`  // 第三方金流收款時所抽取之總額
+	TotalOutcomeGatewayFee int32  `json:"totalOutcomeGatewayFee"` // 第三方金流放款時所抽取之總額
+	TaxFee                 int32  `json:"taxFee"`                 // Todo 扣掉相關國家稅務
+	NetIncome              int32  `json:"netIncome"`              // 老師到帳淨收入
+	Notes                  string `json:"notes"`                  // 相關備註
+	Paid                   bool   `json:"paid"`                   // 是否放完款項
+	ClearingStartedAt      int64  `json:"clearingStartedAt"`      // 結算起始時間
+	CreatedAt              int64  `json:"createdAt"`              // 創建時間
+	UpdatedAt              int64  `json:"updatedAt"`              // 更新時間
+	PaidAt                 int64  `json:"paidAt"`                 // 放款時間
 }
 
 type Order struct {

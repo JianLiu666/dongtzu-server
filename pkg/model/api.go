@@ -1,13 +1,13 @@
 package model
 
 type ErrRes struct {
-	Code       string `json:"code"`    // 系統自定義錯誤代碼
-	StatusCode string `json:"status"`  // http 狀態碼
-	Message    string `json:"message"` // 錯誤訊息
+	Code       string `json:"code"`       // 系統自定義錯誤代碼
+	StatusCode string `json:"statusCode"` // http 狀態碼
+	Message    string `json:"message"`    // 錯誤訊息
 }
 
 type CreateUpdateDeleteRes struct {
-	StatusCode string `json:"status"`
+	StatusCode string `json:"statusCode"`
 }
 
 type Pagination struct {
@@ -52,7 +52,7 @@ type UpdateProviderInfoReq struct {
 }
 
 type RegisterOrUpdateProviderRes struct {
-	StatusCode string `json:"status"`
+	StatusCode string `json:"statusCode"`
 }
 
 type IncomeSummary struct {
@@ -62,7 +62,7 @@ type IncomeSummary struct {
 }
 
 type ProviderIncomeSummaryRes struct {
-	StatusCode string        `json:"status"`
+	StatusCode string        `json:"statusCode"`
 	Data       IncomeSummary `json:"data"`
 }
 
@@ -76,12 +76,12 @@ type EventSchedule struct {
 }
 
 type ProviderEventScheduleRes struct {
-	StatusCode string          `json:"status"`
+	StatusCode string          `json:"statusCode"`
 	Data       []EventSchedule `json:"data"`
 }
 
 type ProviderMonthReceiptList struct {
-	StatusCode string         `json:"status"`
+	StatusCode string         `json:"statusCode"`
 	Data       []MonthReceipt `json:"data"`
 	Meta       Pagination     `json:"meta"`
 }
@@ -99,12 +99,12 @@ type CreateOrUpdateServiceProductsReq struct {
 }
 
 type ProviderServiceProductListRes struct {
-	StatusCode string           `json:"status"`
+	StatusCode string           `json:"statusCode"`
 	Data       []ServiceProduct `json:"data"`
 }
 
 type ProviderScheduleListRes struct {
-	StatusCode string     `json:"status"`
+	StatusCode string     `json:"statusCode"`
 	Data       []Schedule `json:"data"`
 	Meta       Pagination `json:"meta"`
 }
@@ -125,7 +125,7 @@ type CreateServiceScheduleRuleReq struct {
 	CycleEndAt          int64  `json:"cycleEndAt"`          // 週期結束時間 -> 配合結束類型看
 	CycleEndType        int    `json:"cycleEndType"`        // 結束類型：0幾次、-1時間、-2永遠不停
 	CycleRepeatedAmount int    `json:"cycleRepeatedAmount"` // 搭配週期間隔數量、單位看
-	CycleDiffAmount     int    `json:"cycleDiff"`           // 週期間隔數量
+	CycleDiffAmount     int    `json:"cycleDiffAmount"`     // 週期間隔數量
 	CycleDiffUnit       int    `json:"cycleDiffUnit"`       // 週期間隔單位(0-天、1-週、2-月、3-年)
 	MinConsumerLimit    int    `json:"minConsumerLimit"`    // 最小開課人數下限
 	MaxConsumerLimit    int    `json:"maxConsumerLimit"`    // 最大開課人數上限
