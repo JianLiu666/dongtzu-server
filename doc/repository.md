@@ -68,10 +68,4 @@
 
 ### NewebPay SDK
 
-藍新金流測試帳密
-
- - https://cwww.newebpay.com/
- - ts0542648@gmail.com
- - P@ssw0rd
-
 - [ ] 串測(待定)
