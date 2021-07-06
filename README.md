@@ -4,7 +4,9 @@
   - [Introduction](#introduction)
   - [Key Features](#key-features)
   - [Prototype](#prototype)
-  - [Server Setup](#server-setup)
+  - [Commands](#commands)
+    - [db seed](#db-seed)
+    - [setup server](#setup-server)
 
 <br>
 
@@ -48,7 +50,15 @@
 
 <br>
 
-## Server Setup
+## Commands
+
+### db seed
+
+```shell
+go run main.go migration
+```
+
+### setup server
 
 ```shell
 go run main.go server
