@@ -4,6 +4,7 @@
   - [Introduction](#introduction)
   - [Key Features](#key-features)
   - [Prototype](#prototype)
+  - [Server Setup](#server-setup)
 
 <br>
 
@@ -44,3 +45,11 @@
 **Teacher Official Account**
 
 ![Teacher](./doc/img/Teacher_OfficialAccount.svg)
+
+<br>
+
+## Server Setup
+
+```shell
+go run main.go server
+```
